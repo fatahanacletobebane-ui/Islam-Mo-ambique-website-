@@ -90,15 +90,21 @@
 </div>
 
 <script>
-// CONFIGURAÇÃO FIREBASE
+// --- CONFIGURAÇÃO FIREBASE COM OS SEUS DADOS REAIS ---
 const firebaseConfig = {
-    apiKey: "COLE_AQUI_A_SUA_API_KEY", // <--- IMPORTANTE: COLE A CHAVE AQUI
+    apiKey: "AIzaSyD2rNS7HSJyek3OCrRquudFgqQSWXZJYrY",
     authDomain: "madrassa-online-b851c.firebaseapp.com",
     databaseURL: "https://madrassa-online-b851c-default-rtdb.firebaseio.com",
     projectId: "madrassa-online-b851c",
-    storageBucket: "madrassa-online-b851c.appspot.com",
-    appId: "1:1048250106491:web:e000000000000000"
+    storageBucket: "madrassa-online-b851c.firebasestorage.app",
+    messagingSenderId: "360782668012",
+    appId: "1:360782668012:web:d501ef187911db632445c9",
+    measurementId: "G-RV9GD4S22T"
 };
+
+// Inicialização (Mantenha estas linhas abaixo)
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
