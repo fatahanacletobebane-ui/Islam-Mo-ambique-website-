@@ -7,6 +7,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
@@ -14,68 +15,74 @@
         body { font-family: 'Cairo', sans-serif; background: var(--light); margin: 0; padding: 0; user-select: none; }
         .hidden { display: none !important; }
         
-        /* Estilos Gerais */
-        header { background: var(--primary); color: white; padding: 15px; text-align: center; }
-        .stats-bar { background: var(--gold); display: flex; justify-content: space-around; padding: 8px; font-weight: bold; }
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .stats-bar { background: var(--gold); display: flex; justify-content: space-around; padding: 8px; font-weight: bold; color: #000; }
         .card { background: white; margin: 15px; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         
-        /* Menu */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .btn-menu { background: white; padding: 20px 10px; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; border: 1px solid #ddd; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
+        .btn-menu { background: white; padding: 20px 10px; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-menu:active { transform: scale(0.95); background: #f9f9f9; }
         
-        /* Modal */
         .modal-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: none; flex-direction: column; }
         iframe { flex: 1; border: none; width: 100%; height: 100%; }
-        .btn-back { padding: 10px; background: #333; color: white; border: none; width: 100%; cursor: pointer; }
+        .btn-back { padding: 12px; background: #d32f2f; color: white; border: none; width: 100%; font-weight: bold; cursor: pointer; }
 
-        /* Tasbih */
         .tasbih-area { text-align: center; padding: 30px; }
-        .counter { font-size: 4rem; color: var(--primary); margin: 20px 0; }
+        .counter { font-size: 5rem; color: var(--primary); margin: 20px 0; border: 5px solid var(--gold); display: inline-block; padding: 20px 40px; border-radius: 50%; }
         
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        .btn-main { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .btn-main { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        
+        #timer { font-size: 2.2rem; color: #d32f2f; font-weight: bold; margin: 10px 0; }
     </style>
 </head>
 <body>
 
-<div id="auth-screen" class="card" style="margin-top: 50px;">
-    <h2 style="text-align: center;">🕋 ISLAM MOÇAMBIQUE</h2>
+<div id="auth-screen" class="card" style="margin-top: 40px; max-width: 450px; margin-left: auto; margin-right: auto;">
+    <h2 style="text-align: center; color: var(--primary);">🕋 ISLAM MOÇAMBIQUE</h2>
+    
     <div id="login-box">
-        <input type="number" id="l-phone" placeholder="Número Celular">
+        <input type="number" id="l-phone" placeholder="Número de Celular">
         <input type="password" id="l-pin" placeholder="PIN (6 dígitos)">
         <button class="btn-main" onclick="entrar()">ENTRAR</button>
-        <p style="text-align: center; color: blue;" onclick="document.getElementById('login-box').classList.add('hidden'); document.getElementById('reg-box').classList.remove('hidden')">Criar Conta</p>
+        <p style="text-align: center; color: var(--primary); cursor: pointer; font-weight: bold; margin-top: 15px;" onclick="document.getElementById('login-box').classList.add('hidden'); document.getElementById('reg-box').classList.remove('hidden')">Não tem conta? Registe-se</p>
     </div>
+
     <div id="reg-box" class="hidden">
         <input type="text" id="r-nome" placeholder="Nome Completo">
-        <input type="number" id="r-phone" placeholder="Número Celular">
+        <input type="number" id="r-phone" placeholder="Número de Celular">
         <input type="password" id="r-pin" placeholder="Criar PIN (6 dígitos)">
-        <p style="font-size: 0.8rem;"><input type="checkbox" id="r-termos"> Aceito os termos de uso (Dedução de 12 estrelas por clique).</p>
-        <button class="btn-main" onclick="registar()">REGISTAR</button>
+        <p style="font-size: 0.85rem; background: #eee; padding: 10px; border-radius: 5px;">
+            <input type="checkbox" id="r-termos" style="width: auto;"> Aceito os Termos e Condições (Dedução de 12 estrelas por acesso aos módulos).
+        </p>
+        <button class="btn-main" onclick="registar()">CRIAR CONTA E ENTRAR</button>
+        <p style="text-align: center; color: var(--primary); cursor: pointer; font-weight: bold;" onclick="document.getElementById('reg-box').classList.add('hidden'); document.getElementById('login-box').classList.remove('hidden')">Já tenho conta</p>
     </div>
 </div>
 
 <div id="main-app" class="hidden">
-    <header><h3 id="user-name">Assalamu Alaikum</h3></header>
+    <header><h3 id="user-name" style="margin:0">Assalamu Alaikum</h3></header>
     <div class="stats-bar">
         <span>⭐ Estrelas: <b id="u-stars">0</b></span>
-        <span>PRO: <b id="u-pro">NO</b></span>
+        <span>Nível PRO: <b id="u-pro">NO</b></span>
     </div>
 
-    <div class="card" style="text-align: center; border: 2px solid var(--gold);">
-        👑 <b>Ativar PRO (25MTN)</b><br>Mpesa: 1228803 (Bebane)
+    <div class="card" style="text-align: center; background: #fffde7; border: 2px dashed var(--gold);">
+        👑 <b>Ativar Nível PRO (25MTN/Mês)</b><br>
+        Mpesa Paga Fácil: <b>1228803</b> (Bebane)
     </div>
 
     <div class="card" style="text-align: center;">
-        <h3 id="prox-salat">A carregar...</h3>
-        <div id="timer" style="font-size: 2rem; color: red; font-weight: bold;">00:00:00</div>
+        <h3 id="prox-salat" style="margin-top:0">Próximo Salat</h3>
+        <div id="timer">--:--:--</div>
+        <small>Notificação 15min antes e Azan na hora exata.</small>
         <audio id="azan-player" src="https://www.dropbox.com/scl/fi/khfvlutda92d8nec8xcrc/azan1.mp3?rlkey=vqzb4c8dz4mloqbxb99zwe3lr&st=48gmfhmg&dl=1"></audio>
     </div>
 
     <div class="menu-grid">
-        <div class="btn-menu" onclick="abrir('quran-read')">📖 Ler Alcorão</div>
-        <div class="btn-menu" onclick="abrir('quran-audio')">🎧 Áudio Alcorão</div>
-        <div class="btn-menu" onclick="abrir('tasbih')">📿 Tasbih</div>
+        <div class="btn-menu" onclick="abrir('q-read')">📖 Ler Alcorão</div>
+        <div class="btn-menu" onclick="abrir('q-audio')">🎧 Alcorão Áudio</div>
+        <div class="btn-menu" onclick="abrir('tasbih')">📿 Tasbih Digital</div>
         <div class="btn-menu" onclick="abrir('chat')">💬 Chat Room</div>
         <div class="btn-menu" onclick="abrir('7kali')">📜 7 Kalimahs</div>
         <div class="btn-menu" onclick="abrir('duas')">🤲 Duas Diárias</div>
@@ -85,12 +92,12 @@
 </div>
 
 <div id="modal-app" class="modal-full">
-    <button class="btn-back" onclick="fechar()">⬅ VOLTAR AO MENU</button>
-    <div id="modal-content" style="flex:1;"></div>
+    <button class="btn-back" onclick="fechar()">⬅ VOLTAR AO MENU PRINCIPAL</button>
+    <div id="modal-content" style="flex:1; overflow: auto;"></div>
 </div>
 
 <script>
-// --- CONFIGURAÇÃO FIREBASE COM OS SEUS DADOS REAIS ---
+// CONFIGURAÇÃO FIREBASE REAL
 const firebaseConfig = {
     apiKey: "AIzaSyD2rNS7HSJyek3OCrRquudFgqQSWXZJYrY",
     authDomain: "madrassa-online-b851c.firebaseapp.com",
@@ -102,29 +109,47 @@ const firebaseConfig = {
     measurementId: "G-RV9GD4S22T"
 };
 
-// Inicialização (Mantenha estas linhas abaixo)
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
+// Inicialização
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 let userAtivo = null;
 
-// AUTH
+// FUNÇÃO DE REGISTO
 function registar() {
     const nome = document.getElementById('r-nome').value;
     const phone = document.getElementById('r-phone').value;
     const pin = document.getElementById('r-pin').value;
-    if(!document.getElementById('r-termos').checked) return alert("Aceite os termos.");
+    const aceitou = document.getElementById('r-termos').checked;
 
-    db.ref('Users/' + phone).set({
-        nome: nome, numero: phone, pin: pin, estrelas: 55, nivelPro: "no"
-    }).then(() => { alert("Registado!"); location.reload(); });
+    if(!nome || !phone || !pin) return alert("Preencha todos os campos.");
+    if(pin.length !== 6) return alert("O PIN deve ter 6 dígitos.");
+    if(!aceitou) return alert("Aceite os termos.");
+
+    // Verifica se já existe
+    db.ref('Users/' + phone).once('value', snap => {
+        if(snap.exists()) return alert("Este número já está registado!");
+
+        db.ref('Users/' + phone).set({
+            nome: nome,
+            numero: phone,
+            pin: pin,
+            estrelas: 55, // Bónus de 55 no primeiro login
+            nivelPro: "no"
+        }).then(() => {
+            alert("Registo com sucesso! Bem-vindo.");
+            loginProcesso(phone, pin);
+        });
+    });
 }
 
+// FUNÇÃO DE LOGIN
 function entrar() {
     const phone = document.getElementById('l-phone').value;
     const pin = document.getElementById('l-pin').value;
+    loginProcesso(phone, pin);
+}
+
+function loginProcesso(phone, pin) {
     db.ref('Users/' + phone).once('value', snap => {
         const u = snap.val();
         if(u && u.pin === pin) {
@@ -132,49 +157,80 @@ function entrar() {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
             ligarSync();
-        } else { alert("Dados errados!"); }
+        } else {
+            alert("Número ou PIN incorrectos.");
+        }
     });
 }
 
+// SINCRONIZAÇÃO EM TEMPO REAL
 function ligarSync() {
     db.ref('Users/' + userAtivo.numero).on('value', snap => {
         userAtivo = snap.val();
         document.getElementById('u-stars').innerText = userAtivo.estrelas;
         document.getElementById('u-pro').innerText = userAtivo.nivelPro.toUpperCase();
-        document.getElementById('user-name').innerText = "Olá, " + userAtivo.nome;
+        document.getElementById('user-name').innerText = "Assalamu Alaikum, " + userAtivo.nome;
     });
 }
 
-// LOGICA DE MODULOS
+// MÓDULOS E ESTRELAS
 function abrir(tipo) {
-    if(userAtivo.nivelPro === "no" && userAtivo.estrelas < 12) {
-        return alert("Estrelas insuficientes! Veja Ads ou ative Pro.");
-    }
-    
+    // Regra das Estrelas
     if(userAtivo.nivelPro === "no") {
-        db.ref('Users/' + userAtivo.numero).update({ estrelas: userAtivo.estrelas - 12 });
+        if(userAtivo.estrelas < 12) {
+            return alert("Estrelas insuficientes (Mínimo 12). Ganhe mais estrelas ou ative Nível PRO.");
+        }
+        // Dedução
+        db.ref('Users/' + userAtivo.numero).update({
+            estrelas: userAtivo.estrelas - 12
+        });
     }
 
     const modal = document.getElementById('modal-app');
     const content = document.getElementById('modal-content');
     modal.style.display = 'flex';
 
-    if(tipo === 'quran-read') {
+    if(tipo === 'q-read') {
         content.innerHTML = `<iframe src="https://www.quranwow.com/#/ch/1/t1/ar-allah/t2/pt-elhayek/a1/alafasy-64/a2/minshawy-64/v/1"></iframe>`;
-    } else if(tipo === 'quran-audio') {
+    } else if(tipo === 'q-audio') {
         content.innerHTML = `<iframe src="https://drive.google.com/drive/folders/0BxJL2DWGZAvTQzZwd0J3ZFlSdU0?resourcekey=0-AxA1_iis1T6W2___1Yw9zA"></iframe>`;
     } else if(tipo === 'tasbih') {
-        content.innerHTML = `<div class="tasbih-area"><h2>سُبْحَانَ اللّٰه</h2><div class="counter" id="c">0</div><button class="btn-main" onclick="document.getElementById('c').innerText++">CONTAR</button></div>`;
+        content.innerHTML = `
+            <div class="tasbih-area">
+                <h2>📿 Tasbih Digital</h2>
+                <div class="counter" id="tc">0</div>
+                <button class="btn-main" onclick="document.getElementById('tc').innerText++">Meta: 100 | CONTAR ➕</button>
+                <button onclick="document.getElementById('tc').innerText=0" style="margin-top:15px; background: #666; color: white; border: none; padding: 10px; border-radius: 5px;">Resetar</button>
+            </div>`;
     } else if(tipo === '7kali') {
         content.innerHTML = `<iframe src="https://docs.google.com/document/d/1hbf3t_GA-CIK0xVl6QOtow-InPC88ERGYNHupCNuNY8/edit?usp=drivesdk"></iframe>`;
     } else if(tipo === 'duas') {
         content.innerHTML = `<iframe src="https://docs.google.com/document/d/1V1LBzbZflRYVAxp6xDK6JuN-MHbIAGa3/edit?usp=drivesdk"></iframe>`;
     } else if(tipo === 'apoio') {
-        content.innerHTML = `<div class="card"><h3>Dados de Apoio</h3><p>Mpesa: 1228803 (Bebane)<br>BIM: 0001000000124733562<br>NUIB: 201910009697381</p></div>`;
+        content.innerHTML = `
+            <div class="card">
+                <h3>🤝 Apoio ao Projeto</h3>
+                <p>Mpesa Paga fácil: <b>1228803</b> (Bebane mercados e serviços)</p>
+                <p>Cell: 866186976 (Agira Muquila)</p>
+                <hr>
+                <p><b>Millennium BIM:</b><br>NIB: 0001000000124733562<br>NUIB: 201910009697381<br>Anacleto Bebane</p>
+            </div>`;
+    } else if(tipo === 'chat') {
+        content.innerHTML = `<div style="padding:20px; text-align:center"><h3>💬 Chat Room</h3><p>Em breve... Integrando com nó 'chat' no Firebase.</p></div>`;
+    } else if(tipo === 'stars') {
+        content.innerHTML = `
+            <div class="card" style="text-align:center">
+                <h3>⭐ Ganhar Estrelas</h3>
+                <button class="btn-main" onclick="alert('Partilhado! +2 estrelas (Simulação)')" style="margin-bottom:10px">Partilhar App (+2)</button>
+                <button class="btn-main" style="background:#444" onclick="alert('Vídeo de 10s carregando... +5')">Ver Publicidade (+5)</button>
+            </div>`;
     }
 }
 
-function fechar() { document.getElementById('modal-app').style.display = 'none'; }
+function fechar() {
+    document.getElementById('modal-app').style.display = 'none';
+    document.getElementById('modal-content').innerHTML = '';
+}
 
 </script>
 </body>
