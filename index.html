@@ -5,22 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🕋 ISLAM MOÇAMBIQUE 🕋</title>
     
-    <!-- Fonts e Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
             --primary-green: #1a5f4a;
             --dark-green: #0d3d2d;
@@ -34,1872 +22,311 @@
             --whatsapp: #25D366;
         }
 
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: var(--cream);
-            color: var(--dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--cream); color: var(--dark); overflow-x: hidden; }
 
-        /* Loader */
-        .loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--dark-green);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-        }
+        /* Loader Inicial */
+        .loader { position: fixed; inset: 0; background: var(--dark-green); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: 0.5s; }
+        .loader.hidden { opacity: 0; pointer-events: none; }
 
-        .loader.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+        /* Tela de Autenticação */
+        .auth-screen { position: fixed; inset: 0; background: linear-gradient(135deg, var(--dark-green), var(--primary-green)); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; padding: 20px; }
+        .auth-screen.hidden { display: none; }
+        
+        /* Layout Principal */
+        .app-header { background: linear-gradient(135deg, var(--dark-green), var(--primary-green)); color: var(--white); padding: 15px 20px; position: fixed; top: 0; width: 100%; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .app-container { display: none; padding-top: 70px; padding-bottom: 80px; }
+        .app-container.active { display: block; }
 
-        .loader-moon {
-            font-size: 4rem;
-            color: var(--gold);
-            animation: crescent 2s ease-in-out infinite;
-        }
-
-        @keyframes crescent {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(20deg); }
-        }
-
-        /* Auth Screens */
-        .auth-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9000;
-            padding: 20px;
-        }
-
-        .auth-screen.hidden {
-            display: none;
-        }
-
-        .auth-logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .auth-logo .logo-icon {
-            font-size: 5rem;
-            margin-bottom: 10px;
-        }
-
-        .auth-logo h1 {
-            font-family: 'Amiri', serif;
-            color: var(--gold);
-            font-size: 2rem;
-        }
-
-        .auth-form {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(212,175,55,0.3);
-        }
-
-        .auth-form h2 {
-            color: var(--white);
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            color: var(--cream);
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid rgba(212,175,55,0.3);
-            border-radius: 10px;
-            background: rgba(255,255,255,0.1);
-            color: var(--white);
-            font-family: 'Cairo', sans-serif;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--gold);
-            background: rgba(255,255,255,0.2);
-        }
-
-        .form-group input::placeholder {
-            color: rgba(255,255,255,0.5);
-        }
-
-        .btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: var(--gold);
-            color: var(--dark-green);
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            background: var(--light-gold);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--white);
-            border: 2px solid var(--gold);
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-secondary:hover {
-            background: var(--gold);
-            color: var(--dark-green);
-        }
-
-        .btn-whatsapp {
-            background: var(--whatsapp);
-            color: var(--white);
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-whatsapp:hover {
-            background: #128C7E;
-            transform: translateY(-2px);
-        }
-
-        .auth-toggle {
-            text-align: center;
-            margin-top: 20px;
-            color: var(--cream);
-        }
-
-        .auth-toggle a {
-            color: var(--gold);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* Main App */
-        .app-container {
-            display: none;
-            min-height: 100vh;
-            padding-bottom: 80px;
-        }
-
-        .app-container.active {
-            display: block;
-        }
-
-        /* Header */
-        .app-header {
-            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
-            color: var(--white);
-            padding: 15px 20px;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--gold);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--dark-green);
-            font-weight: bold;
-        }
-
-        .user-details h4 {
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        .user-stars {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.8rem;
-            color: var(--gold);
-        }
-
-        .pro-badge {
-            background: var(--gold);
-            color: var(--dark-green);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            margin-left: 5px;
-        }
-
-        .logout-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: var(--white);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        /* Prayer Hero */
-        .prayer-hero {
-            margin-top: 70px;
-            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
-            color: var(--white);
-            padding: 30px 20px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .prayer-hero::before {
-            content: '☪';
-            position: absolute;
-            font-size: 10rem;
-            opacity: 0.05;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        .current-prayer {
-            position: relative;
-            z-index: 1;
-        }
-
-        .current-prayer h2 {
-            font-family: 'Amiri', serif;
-            font-size: 2rem;
-            color: var(--gold);
-            margin-bottom: 10px;
-        }
-
-        .countdown {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
-        }
-
-        .next-prayer {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-
-        .azan-btn {
-            background: var(--gold);
-            color: var(--dark-green);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            margin-top: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            display: none;
-        }
-
-        .azan-btn.show {
-            display: inline-block;
-            animation: pulse 1s infinite;
-        }
-
-        /* Hadith Section */
-        .hadith-section {
-            background: var(--white);
-            margin: 20px;
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        .hadith-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            color: var(--primary-green);
-        }
-
-        .hadith-header i {
-            font-size: 1.5rem;
-        }
-
-        .hadith-text {
-            font-style: italic;
-            color: var(--dark);
-            line-height: 1.8;
-            font-size: 1rem;
-        }
-
-        .hadith-source {
-            margin-top: 15px;
-            color: var(--gold);
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
+        /* Barra de Status */
+        .user-stats { display: flex; align-items: center; gap: 15px; }
+        .stars-count { color: var(--gold); font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .pro-badge { background: var(--gold); color: var(--dark-green); padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
 
         /* Menu Grid */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            padding: 20px;
-        }
-
-        .menu-item {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 25px 15px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .menu-item:hover {
-            transform: translateY(-5px);
-            border-color: var(--gold);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-
-        .menu-item i {
-            font-size: 2.5rem;
-            color: var(--primary-green);
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .menu-item span {
-            font-size: 0.85rem;
-            color: var(--dark);
-            font-weight: 600;
-        }
-
-        .menu-item.whatsapp {
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            color: var(--white);
-        }
-
-        .menu-item.whatsapp i, .menu-item.whatsapp span {
-            color: var(--white);
-        }
-
-        .menu-item.locked {
-            opacity: 0.5;
-            position: relative;
-        }
-
-        .menu-item.locked::after {
-            content: '🔒';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 1rem;
-        }
-
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--white);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            text-align: center;
-            color: #999;
-            text-decoration: none;
-            font-size: 0.75rem;
-            transition: all 0.3s ease;
-        }
-
-        .nav-item i {
-            font-size: 1.5rem;
-            display: block;
-            margin-bottom: 3px;
-        }
-
-        .nav-item.active {
-            color: var(--primary-green);
-        }
-
-        /* Screens */
-        .screen {
-            display: none;
-            min-height: 100vh;
-            padding: 80px 20px 100px;
-            background: var(--cream);
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        .screen-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .back-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary-green);
-            color: var(--gold);
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .screen-title {
-            font-family: 'Amiri', serif;
-            color: var(--dark-green);
-            font-size: 1.5rem;
-        }
-
-        /* Tasbih Screen */
-        .tasbih-container {
-            background: var(--white);
-            border-radius: 30px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .tasbih-arabic {
-            font-family: 'Noto Naskh Arabic', serif;
-            font-size: 2.5rem;
-            color: var(--primary-green);
-            margin-bottom: 10px;
-        }
-
-        .tasbih-translation {
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .tasbih-counter {
-            font-size: 5rem;
-            font-weight: bold;
-            color: var(--gold);
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
-        }
-
-        .tasbih-goal {
-            color: #999;
-            margin-bottom: 30px;
-        }
-
-        .tasbih-controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .tasbih-btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tasbih-btn.count {
-            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
-            color: var(--white);
-            font-size: 2rem;
-        }
-
-        .tasbih-btn.count:active {
-            transform: scale(0.95);
-        }
-
-        .tasbih-btn.reset {
-            background: #eee;
-            color: #666;
-        }
-
-        .dhikr-selector {
-            margin-bottom: 30px;
-        }
-
-        .dhikr-selector select {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid var(--primary-green);
-            font-family: 'Cairo', sans-serif;
-            font-size: 1rem;
-            background: var(--white);
-            color: var(--dark);
-        }
-
-        /* Chat Screen */
-        .chat-container {
-            background: var(--white);
-            border-radius: 20px;
-            height: calc(100vh - 200px);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-
-        .chat-message {
-            margin-bottom: 15px;
-            max-width: 80%;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .chat-message.own {
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .message-bubble {
-            background: var(--white);
-            padding: 12px 18px;
-            border-radius: 20px;
-            display: inline-block;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .chat-message.own .message-bubble {
-            background: var(--primary-green);
-            color: var(--white);
-        }
-
-        .message-sender {
-            font-size: 0.8rem;
-            color: #999;
-            margin-bottom: 5px;
-        }
-
-        .chat-input-area {
-            padding: 15px;
-            background: var(--white);
-            border-top: 1px solid #eee;
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #ddd;
-            border-radius: 25px;
-            font-family: 'Cairo', sans-serif;
-            font-size: 1rem;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--primary-green);
-        }
-
-        .chat-send {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--primary-green);
-            color: var(--gold);
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        /* Stars Warning */
-        .stars-warning {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            background: var(--red);
-            color: var(--white);
-            padding: 15px;
-            text-align: center;
-            z-index: 999;
-            display: none;
-        }
-
-        .stars-warning.show {
-            display: block;
-            animation: shake 0.5s ease;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        /* Earn Stars Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 30px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .modal-content h3 {
-            color: var(--dark-green);
-            margin-bottom: 20px;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: var(--cream);
-            border-radius: 15px;
-            margin-bottom: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .task-item:hover {
-            background: var(--light-green);
-            color: var(--white);
-        }
-
-        .task-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--gold);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--dark-green);
-            font-size: 1.5rem;
-        }
-
-        .task-info {
-            flex: 1;
-            text-align: left;
-        }
-
-        .task-info h4 {
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        .task-info p {
-            margin: 5px 0 0;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .task-reward {
-            color: var(--gold);
-            font-weight: bold;
-        }
-
-        /* Quiz Screen */
-        .quiz-container {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        .quiz-question {
-            font-size: 1.2rem;
-            color: var(--dark-green);
-            margin-bottom: 25px;
-            font-weight: 600;
-        }
-
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .quiz-option {
-            padding: 20px;
-            background: var(--cream);
-            border: 2px solid transparent;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-
-        .quiz-option:hover {
-            border-color: var(--gold);
-            background: rgba(212,175,55,0.1);
-        }
-
-        .quiz-option.correct {
-            background: #2ecc71;
-            color: var(--white);
-            border-color: #27ae60;
-        }
-
-        .quiz-option.wrong {
-            background: var(--red);
-            color: var(--white);
-            border-color: #c0392b;
-        }
-
-        .quiz-score {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 1.2rem;
-            color: var(--gold);
-        }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .menu-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .tasbih-counter {
-                font-size: 4rem;
-            }
-        }
-
-        /* Animations */
-        .fade-in {
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* WebView Container */
-        .webview-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--white);
-            z-index: 10000;
-            display: none;
-            flex-direction: column;
-        }
-
-        .webview-container.show {
-            display: flex;
-        }
-
-        .webview-header {
-            background: var(--dark-green);
-            color: var(--white);
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .webview-frame {
-            flex: 1;
-            border: none;
-            width: 100%;
-        }
-
-        /* Ad Container */
-        .ad-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10001;
-        }
-
-        .ad-container.show {
-            display: flex;
-        }
-
-        .ad-timer {
-            color: var(--gold);
-            font-size: 3rem;
-            margin-bottom: 20px;
-        }
-
-        .ad-text {
-            color: var(--white);
-            text-align: center;
-            padding: 20px;
-        }
-
-        .ad-close {
-            display: none;
-            margin-top: 20px;
-            padding: 15px 40px;
-            background: var(--gold);
-            color: var(--dark-green);
-            border: none;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .ad-close.show {
-            display: block;
-        }
-
-        /* Contact Info Section */
-        .contact-whatsapp {
-            background: linear-gradient(135deg, #25D366, #128C7E);
-            color: var(--white);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .contact-whatsapp i {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        .contact-whatsapp a {
-            color: var(--white);
-            text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
+        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; }
+        .menu-item { background: var(--white); border-radius: 15px; padding: 20px 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .menu-item:active { transform: scale(0.95); background: #f0f0f0; }
+        .menu-item i { font-size: 1.8rem; color: var(--primary-green); margin-bottom: 8px; display: block; }
+        .menu-item span { font-size: 0.75rem; font-weight: 600; display: block; }
+        .menu-item.support { background: var(--gold); color: var(--dark-green); }
+        .menu-item.support i { color: var(--dark-green); }
+
+        /* Modais */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--white); padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; cursor: pointer; color: #888; }
+
+        /* Dados de Apoio */
+        .bank-info { text-align: left; margin: 15px 0; background: #f9f9f9; padding: 15px; border-radius: 10px; font-size: 0.85rem; }
+        .bank-info div { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+        .bank-info strong { color: var(--primary-green); display: block; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 2px; }
+
+        /* Input PRO */
+        .pro-input { width: 100%; padding: 12px; border: 2px solid var(--gold); border-radius: 10px; margin: 15px 0; font-size: 1.5rem; text-align: center; letter-spacing: 8px; text-transform: uppercase; outline: none; }
+        
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--red); color: white; padding: 12px 25px; border-radius: 30px; font-size: 0.85rem; display: none; z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+
+        input { outline: none; transition: border 0.3s; }
+        input:focus { border: 2px solid var(--gold) !important; }
+        button:active { opacity: 0.8; transform: translateY(1px); }
     </style>
 </head>
 <body>
-    <!-- Loader -->
-    <div class="loader" id="loader">
-        <div class="loader-moon">☪</div>
-        <p style="color: var(--white); margin-top: 20px;">Carregando Islam Moçambique...</p>
+
+    <!-- Loader Inicial -->
+    <div id="loader" class="loader">
+        <i class="fas fa-kaaba fa-spin" style="font-size: 3rem; color: var(--gold);"></i>
+        <p style="color: var(--white); margin-top: 20px; font-weight: bold;">Bismillah...</p>
     </div>
 
-    <!-- Auth Screens -->
-    <div class="auth-screen" id="login-screen">
-        <div class="auth-logo">
-            <div class="logo-icon">🕋</div>
-            <h1>ISLAM MOÇAMBIQUE</h1>
+    <!-- Tela de Login -->
+    <div id="authScreen" class="auth-screen">
+        <div style="text-align: center; margin-bottom: 30px; color: var(--gold);">
+            <i class="fas fa-star-and-crescent fa-4x"></i>
+            <h1 style="font-family: 'Amiri'; margin-top: 15px; font-size: 2.2rem;">Islam Moçambique</h1>
         </div>
-        <div class="auth-form">
-            <h2>Entrar</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label>Número de Celular</label>
-                    <input type="tel" id="login-phone" placeholder="+258 86 XXX XXXX" required>
-                </div>
-                <div class="form-group">
-                    <label>PIN (6 dígitos)</label>
-                    <input type="password" id="login-pin" maxlength="6" placeholder="******" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Entrar</button>
-            </form>
-            <div class="auth-toggle">
-                Não tem conta? <a href="#" onclick="showRegister()">Registar</a>
-            </div>
+        <div style="width: 100%; max-width: 320px;">
+            <input type="text" id="userName" placeholder="Nome Completo" style="width:100%; padding:15px; margin-bottom:12px; border-radius:12px; border:none; font-family: inherit; font-size: 1rem;">
+            <input type="tel" id="userPhone" placeholder="Número de Celular (8x...)" style="width:100%; padding:15px; margin-bottom:20px; border-radius:12px; border:none; font-family: inherit; font-size: 1rem;">
+            <button id="loginBtn" onclick="login()" style="width:100%; padding:16px; background:var(--gold); border:none; border-radius:12px; font-weight:bold; color:var(--dark-green); cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">ENTRAR</button>
         </div>
     </div>
 
-    <div class="auth-screen hidden" id="register-screen">
-        <div class="auth-logo">
-            <div class="logo-icon">🕋</div>
-            <h1>ISLAM MOÇAMBIQUE</h1>
-        </div>
-        <div class="auth-form">
-            <h2>Criar Conta</h2>
-            <form id="register-form">
-                <div class="form-group">
-                    <label>Nome Completo</label>
-                    <input type="text" id="reg-name" placeholder="Seu nome completo" required>
-                </div>
-                <div class="form-group">
-                    <label>Número de Celular</label>
-                    <input type="tel" id="reg-phone" placeholder="+258 86 XXX XXXX" required>
-                </div>
-                <div class="form-group">
-                    <label>Criar PIN (6 dígitos)</label>
-                    <input type="password" id="reg-pin" maxlength="6" placeholder="******" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Criar Conta</button>
-            </form>
-            <button class="btn btn-secondary" onclick="showLogin()">Já tenho conta</button>
-        </div>
-    </div>
-
-    <!-- Stars Warning -->
-    <div class="stars-warning" id="stars-warning">
-        <i class="fas fa-exclamation-triangle"></i> 
-        Estrelas esgotadas! Complete tarefas ou ative o nível Pro.
-        <button onclick="showEarnStars()" style="margin-left: 10px; padding: 5px 15px; background: var(--white); color: var(--red); border: none; border-radius: 15px; cursor: pointer;">Ganhar Estrelas</button>
-    </div>
-
-    <!-- Earn Stars Modal -->
-    <div class="modal-overlay" id="earn-stars-modal">
-        <div class="modal-content">
-            <h3><i class="fas fa-star" style="color: var(--gold);"></i> Ganhar Estrelas</h3>
-            <div class="task-item" onclick="shareWebsite()">
-                <div class="task-icon"><i class="fas fa-share-alt"></i></div>
-                <div class="task-info">
-                    <h4>Partilhar Website</h4>
-                    <p>Partilhe com 5 pessoas</p>
-                </div>
-                <div class="task-reward">+5 ⭐</div>
+    <!-- Conteúdo Principal -->
+    <div id="app" class="app-container">
+        <header class="app-header">
+            <div class="user-stats">
+                <div id="userLabel" style="font-weight: bold; font-size: 0.9rem;">Usuário</div>
+                <div class="stars-count"><i class="fas fa-star"></i> <span id="starDisplay">100</span></div>
+                <div id="proBadge" class="pro-badge" style="display:none;">PRO</div>
             </div>
-            <div class="task-item" onclick="watchAd()">
-                <div class="task-icon"><i class="fas fa-play"></i></div>
-                <div class="task-info">
-                    <h4>Ver Anúncio</h4>
-                    <p>Assista por 10 segundos</p>
-                </div>
-                <div class="task-reward">+10 ⭐</div>
-            </div>
-            <div class="task-item" onclick="activatePro()">
-                <div class="task-icon" style="background: linear-gradient(135deg, var(--gold), var(--light-gold));"><i class="fas fa-crown"></i></div>
-                <div class="task-info">
-                    <h4>Ativar Nível Pro</h4>
-                    <p>25 MTN/mês - Estrelas ilimitadas</p>
-                </div>
-                <div class="task-reward" style="color: var(--primary-green);">PRO</div>
-            </div>
-            <button class="btn btn-secondary" onclick="closeEarnStars()" style="margin-top: 20px;">Fechar</button>
-        </div>
-    </div>
+            <button onclick="logout()" style="background:rgba(255,255,255,0.1); border:none; color:white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"><i class="fas fa-sign-out-alt"></i></button>
+        </header>
 
-    <!-- Ad Container -->
-    <div class="ad-container" id="ad-container">
-        <div class="ad-timer" id="ad-timer">10</div>
-        <div class="ad-text">
-            <i class="fas fa-ad" style="font-size: 3rem; color: var(--gold); margin-bottom: 20px;"></i>
-            <p>Assista ao anúncio para ganhar 10 estrelas</p>
-        </div>
-        <button class="ad-close" id="ad-close-btn" onclick="closeAd()">Fechar e Ganhar Estrelas</button>
-    </div>
-
-    <!-- WebView Container -->
-    <div class="webview-container" id="webview-container">
-        <div class="webview-header">
-            <button class="back-btn" onclick="closeWebview()"><i class="fas fa-arrow-left"></i></button>
-            <span id="webview-title">Alcorão</span>
-        </div>
-        <iframe class="webview-frame" id="webview-frame" src=""></iframe>
-    </div>
-
-    <!-- Main App -->
-    <div class="app-container" id="app-container">
-        <!-- Header -->
-        <div class="app-header">
-            <div class="user-info">
-                <div class="user-avatar" id="user-avatar">U</div>
-                <div class="user-details">
-                    <h4 id="user-name">Usuário</h4>
-                    <div class="user-stars">
-                        <i class="fas fa-star"></i>
-                        <span id="stars-count">100</span>
-                        <span class="pro-badge hidden" id="pro-badge">PRO</span>
-                    </div>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+        <div style="padding: 20px; background: white; margin: 15px; border-radius: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h3 style="font-family: 'Amiri'; color: var(--primary-green); font-size: 1.4rem;">Dhikr do Dia</h3>
+            <p id="dailyHadith" style="font-style: italic; font-size: 0.95rem; margin-top: 10px; color: #555;">"A melhor caridade é dar água a quem tem sede."</p>
         </div>
 
-        <!-- Prayer Hero -->
-        <div class="prayer-hero">
-            <div class="current-prayer">
-                <h2 id="current-prayer-name">Carregando...</h2>
-                <div class="countdown" id="countdown">00:00:00</div>
-                <div class="next-prayer">Próximo: <span id="next-prayer-name">--:--</span></div>
-                <button class="azan-btn" id="azan-btn" onclick="playAzan()">
-                    <i class="fas fa-volume-up"></i> Tocar Azan
-                </button>
-            </div>
-        </div>
-
-        <!-- Hadith Section -->
-        <div class="hadith-section">
-            <div class="hadith-header">
-                <i class="fas fa-book-open"></i>
-                <h3>Hadith do Dia</h3>
-            </div>
-            <div class="hadith-text" id="hadith-text">
-                "As ações são julgadas pelas intenções, e cada pessoa terá o que pretendeu..."
-            </div>
-            <div class="hadith-source" id="hadith-source">— Sahih al-Bukhari, 1</div>
-        </div>
-
-        <!-- Menu Grid -->
         <div class="menu-grid">
-            <div class="menu-item" onclick="openWebview('https://drive.google.com/drive/folders/1b61ZOyB07h0AhOoKYtvjyfZqtrXbRQO0', 'Alcorão Áudio')">
-                <i class="fas fa-headphones"></i>
-                <span>Alcorão Áudio</span>
+            <div class="menu-item" onclick="handleMenu('quran')">
+                <i class="fas fa-book-quran"></i>
+                <span>Alcorão</span>
             </div>
-            <div class="menu-item" onclick="openWebview('https://www.quranwow.com/#/ch/1/t1/ar-allah/t2/pt-elhayek/a1/alafasy-64/a2/minshawy-64/v/1', 'Ler Alcorão')">
-                <i class="fas fa-book-open"></i>
-                <span>Ler Alcorão</span>
+            <div class="menu-item" onclick="handleMenu('tasbih')">
+                <i class="fas fa-clock-rotate-left"></i>
+                <span>Tasbih</span>
             </div>
-            <div class="menu-item" onclick="showScreen('tasbih-screen')">
-                <i class="fas fa-pray"></i>
-                <span>Tasbih Digital</span>
+            <div class="menu-item" onclick="handleMenu('horarios')">
+                <i class="fas fa-mosque"></i>
+                <span>Horários</span>
             </div>
-            <div class="menu-item" onclick="showScreen('chat-screen')">
-                <i class="fas fa-comments"></i>
-                <span>Chat Room</span>
+            <div class="menu-item" onclick="handleMenu('pro')">
+                <i class="fas fa-gem" style="color: var(--gold);"></i>
+                <span>Nível PRO</span>
             </div>
-            <div class="menu-item" onclick="openLink('https://docs.google.com/document/d/1hbf3t_GA-CIK0xVl6QOtow-InPC88ERGYNHupCNuNY8/edit?usp=drivesdk')">
-                <i class="fas fa-hand-holding-heart"></i>
-                <span>7 Kalimahs</span>
+            <div class="menu-item support" onclick="showModal('supportModal')">
+                <i class="fas fa-heart"></i>
+                <span>Apoiar</span>
             </div>
-            <div class="menu-item" onclick="openLink('https://docs.google.com/document/d/1V1LBzbZflRYVAxp6xDK6JuN-MHbIAGa3/edit?usp=drivesdk&ouid=104825010649175353764&rtpof=true&sd=true')">
-                <i class="fas fa-hands"></i>
-                <span>Duãs Diárias</span>
-            </div>
-            <div class="menu-item" onclick="showScreen('quiz-screen')">
-                <i class="fas fa-question-circle"></i>
-                <span>Quiz Islâmico</span>
-            </div>
-            <div class="menu-item whatsapp" onclick="openLink('https://chat.whatsapp.com/HVjrMg5MuWc3oicaKMZGZw?mode=gi_t')">
-                <i class="fab fa-whatsapp"></i>
-                <span>Madrassa Online</span>
-            </div>
-            <div class="menu-item" onclick="showEarnStars()">
-                <i class="fas fa-star" style="color: var(--gold);"></i>
-                <span>Ganhar Estrelas</span>
+            <div class="menu-item" onclick="handleMenu('chat')">
+                <i class="fas fa-users"></i>
+                <span>Comunidade</span>
             </div>
         </div>
     </div>
 
-    <!-- Tasbih Screen -->
-    <div class="screen" id="tasbih-screen">
-        <div class="screen-header">
-            <button class="back-btn" onclick="showScreen('main')"><i class="fas fa-arrow-left"></i></button>
-            <h2 class="screen-title">Tasbih Digital</h2>
-        </div>
-        <div class="tasbih-container">
-            <div class="dhikr-selector">
-                <select id="dhikr-select" onchange="changeDhikr()">
-                    <option value="subhanallah">سُبْحَانَ اللّٰه - SubhanAllah</option>
-                    <option value="alhamdulillah">ٱلْحَمْدُ لِلّٰه - Alhamdulillah</option>
-                    <option value="la-ilaha">لَا إِلٰهَ إِلَّا اللّٰه - La ilaha illa Allah</option>
-                    <option value="allahu-akbar">ٱللّٰهُ أَكْبَر - Allahu Akbar</option>
-                    <option value="la-hawla">لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ - La hawla wa la quwwata illa billah</option>
-                </select>
-            </div>
-            <div class="tasbih-arabic" id="tasbih-arabic">سُبْحَانَ اللّٰه</div>
-            <div class="tasbih-translation" id="tasbih-translation">SubhanAllah (Glorificado seja Allah)</div>
-            <div class="tasbih-counter" id="tasbih-count">0</div>
-            <div class="tasbih-goal">Meta: <span id="tasbih-goal">100</span></div>
-            <div class="tasbih-controls">
-                <button class="tasbih-btn reset" onclick="resetTasbih()"><i class="fas fa-redo"></i></button>
-                <button class="tasbih-btn count" onclick="countTasbih()"><i class="fas fa-plus"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat Screen -->
-    <div class="screen" id="chat-screen">
-        <div class="screen-header">
-            <button class="back-btn" onclick="showScreen('main')"><i class="fas fa-arrow-left"></i></button>
-            <h2 class="screen-title">Chat Room</h2>
-        </div>
-        <div class="chat-container">
-            <div class="chat-messages" id="chat-messages">
-                <!-- Messages will be loaded here -->
-            </div>
-            <div class="chat-input-area">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Escreva uma mensagem..." maxlength="200">
-                <button class="chat-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quiz Screen -->
-    <div class="screen" id="quiz-screen">
-        <div class="screen-header">
-            <button class="back-btn" onclick="showScreen('main')"><i class="fas fa-arrow-left"></i></button>
-            <h2 class="screen-title">Quiz Islâmico</h2>
-        </div>
-        <div class="quiz-container" id="quiz-container">
-            <div class="quiz-question" id="quiz-question">Carregando pergunta...</div>
-            <div class="quiz-options" id="quiz-options">
-                <!-- Options will be loaded here -->
-            </div>
-            <div class="quiz-score" id="quiz-score">Pontuação: 0</div>
-        </div>
-    </div>
-
-    <!-- Contact Screen -->
-    <div class="screen" id="contact-screen">
-        <div class="screen-header">
-            <button class="back-btn" onclick="showScreen('main')"><i class="fas fa-arrow-left"></i></button>
-            <h2 class="screen-title">Contacto</h2>
-        </div>
-        <div class="contact-whatsapp" onclick="openLink('https://wa.me/258860407269')">
-            <i class="fab fa-whatsapp"></i>
-            <p>WhatsApp</p>
-            <a href="https://wa.me/258860407269">+258 86 040 7269</a>
-        </div>
-        <div class="contact-info" style="background: var(--white); padding: 30px; border-radius: 20px;">
-            <div class="contact-item" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                <i class="fas fa-phone" style="width: 50px; height: 50px; background: var(--primary-green); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center;"></i>
+    <!-- Modal de Apoio -->
+    <div id="supportModal" class="modal">
+        <div class="modal-content">
+            <i class="fas fa-times close-modal" onclick="hideModal('supportModal')"></i>
+            <h3 style="text-align: center; color: var(--primary-green); font-family: 'Amiri'; font-size: 1.5rem;">Apoiar o Projecto</h3>
+            <p style="font-size: 0.85rem; text-align: center; margin: 10px 0; color: #666;">Ajude-nos a manter o servidor activo.</p>
+            
+            <div class="bank-info">
                 <div>
-                    <h4 style="color: var(--dark-green);">Telefone</h4>
-                    <p>+258 86 040 7269</p>
+                    <strong>M-Pesa Agente Paga Fácil</strong>
+                    1228803 (BEBANE)
+                </div>
+                <div>
+                    <strong>Millennium BIM</strong>
+                    000100000012473356257
+                </div>
+                <div>
+                    <strong>NUIB</strong>
+                    201910009697381
                 </div>
             </div>
-            <div class="contact-item" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
-                <i class="fas fa-envelope" style="width: 50px; height: 50px; background: var(--primary-green); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center;"></i>
-                <div>
-                    <h4 style="color: var(--dark-green);">Email</h4>
-                    <p>islammocambique@gmail.com</p>
-                </div>
-            </div>
-            <div class="contact-item" style="display: flex; align-items: center; gap: 15px;">
-                <i class="fas fa-map-marker-alt" style="width: 50px; height: 50px; background: var(--primary-green); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center;"></i>
-                <div>
-                    <h4 style="color: var(--dark-green);">Endereço</h4>
-                    <p>Maputo, Moçambique</p>
-                </div>
-            </div>
+            <button onclick="hideModal('supportModal')" style="width:100%; padding:12px; background:var(--primary-green); color:white; border:none; border-radius:10px; font-weight: bold; cursor: pointer;">OK</button>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav" id="bottom-nav" style="display: none;">
-        <a href="#" class="nav-item active" onclick="showScreen('main')">
-            <i class="fas fa-home"></i>
-            Início
-        </a>
-        <a href="#" class="nav-item" onclick="showScreen('tasbih-screen')">
-            <i class="fas fa-pray"></i>
-            Tasbih
-        </a>
-        <a href="#" class="nav-item" onclick="showScreen('chat-screen')">
-            <i class="fas fa-comments"></i>
-            Chat
-        </a>
-        <a href="#" class="nav-item" onclick="showScreen('contact-screen')">
-            <i class="fas fa-phone"></i>
-            Contacto
-        </a>
+    <!-- Modal PRO -->
+    <div id="proModal" class="modal">
+        <div class="modal-content">
+            <i class="fas fa-times close-modal" onclick="hideModal('proModal')"></i>
+            <h3 style="text-align: center; font-family: 'Amiri'; font-size: 1.5rem;">Activar Modo PRO</h3>
+            <p style="font-size: 0.8rem; text-align: center; margin-top: 10px; color: #666;">Insira o código de 4 letras gerado pelo seu número.</p>
+            <input type="text" id="proCode" class="pro-input" maxlength="4" placeholder="....">
+            <button onclick="verifyPro()" style="width:100%; padding:15px; background:var(--gold); border:none; border-radius:12px; font-weight:bold; cursor: pointer;">ATIVAR AGORA</button>
+            <p style="font-size: 0.7rem; color: #999; margin-top: 15px; text-align: center;">O código corresponde aos últimos 4 dígitos do seu telefone (0=A, 1=B, 2=C...)</p>
+        </div>
     </div>
 
-    <!-- JavaScript -->
+    <div id="toast" class="toast">⚠️ Estrelas insuficientes! (Custo: 7)</div>
+
     <script>
-        // ============================================
-        // FIREBASE CONFIGURAÇÃO
-        // ============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyD2rNS7HSJyek3OCrRquudFgqQSWXZJYrY",
-            authDomain: "madrassa-online-b851c.firebaseapp.com",
-            databaseURL: "https://madrassa-online-b851c-default-rtdb.firebaseio.com",
-            projectId: "madrassa-online-b851c",
-            storageBucket: "madrassa-online-b851c.firebasestorage.app",
-            messagingSenderId: "360782668012",
-            appId: "1:360782668012:web:d501ef187911db632445c9",
-            measurementId: "G-RV9GD4S22T"
+        // Estado Global (Failsafe para navegadores que bloqueiam localStorage)
+        let user = {
+            name: "",
+            phone: "",
+            stars: 100,
+            isPro: false
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const CODE_MAP = {
+            '0':'A', '1':'B', '2':'C', '3':'D', '4':'E', 
+            '5':'F', '6':'G', '7':'H', '8':'I', '9':'J'
+        };
 
-        // ============================================
-        // VARIÁVEIS GLOBAIS
-        // ============================================
-        let currentUser = null;
-        let userData = null;
-        let tasbihCount = 0;
-        let quizScore = 0;
-        let currentQuizQuestion = 0;
-        let countdownInterval = null;
-        let azanAudio = null;
-
-        // ============================================
-        // AUTH FUNCTIONS
-        // ============================================
-        function showLogin() {
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('register-screen').classList.add('hidden');
-        }
-
-        function showRegister() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('register-screen').classList.remove('hidden');
-        }
-
-        // Login
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const phone = document.getElementById('login-phone').value;
-            const pin = document.getElementById('login-pin').value;
-
-            db.ref('users').orderByChild('phone').equalTo(phone).once('value')
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        const userData = snapshot.val();
-                        const userId = Object.keys(userData)[0];
-                        const user = userData[userId];
-
-                        if (user.pin === pin) {
-                            currentUser = { uid: userId, ...user };
-                            loadUserData(userId);
-                            showApp();
-                        } else {
-                            alert('PIN incorreto!');
-                        }
-                    } else {
-                        alert('Usuário não encontrado!');
-                    }
-                });
-        });
-
-        // Register
-        document.getElementById('register-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const phone = document.getElementById('reg-phone').value;
-            const pin = document.getElementById('reg-pin').value;
-
-            // Check if phone already exists
-            db.ref('users').orderByChild('phone').equalTo(phone).once('value')
-                .then(snapshot => {
-                    if (snapshot.exists()) {
-                        alert('Este número já está registado!');
-                        return;
-                    }
-
-                    const newUserRef = db.ref('users').push();
-                    const userData = {
-                        name: name,
-                        phone: phone,
-                        pin: pin,
-                        stars: 100,
-                        nivelPro: false,
-                        proExpiry: null,
-                        createdAt: firebase.database.ServerValue.TIMESTAMP
-                    };
-
-                    newUserRef.set(userData)
-                        .then(() => {
-                            alert('Conta criada com sucesso! Entre com o seu PIN.');
-                            showLogin();
-                        });
-                });
-        });
-
-        function loadUserData(userId) {
-            db.ref('users/' + userId).on('value', snapshot => {
-                userData = snapshot.val();
-                updateUserUI();
-                checkStars();
-            });
-        }
-
-        function updateUserUI() {
-            if (!userData) return;
-            
-            document.getElementById('user-name').textContent = userData.name;
-            document.getElementById('user-avatar').textContent = userData.name.charAt(0).toUpperCase();
-            document.getElementById('stars-count').textContent = userData.stars;
-            
-            const proBadge = document.getElementById('pro-badge');
-            if (userData.nivelPro) {
-                proBadge.classList.remove('hidden');
-            } else {
-                proBadge.classList.add('hidden');
+        // Função segura para guardar dados
+        function saveToStorage() {
+            try {
+                localStorage.setItem('islam_mz_user_v2', JSON.stringify(user));
+            } catch (e) {
+                console.warn("LocalStorage bloqueado. Dados salvos apenas nesta sessão.");
             }
         }
 
-        function checkStars() {
-            if (!userData) return;
-            
-            const warning = document.getElementById('stars-warning');
-            
-            if (userData.stars <= 0 && !userData.nivelPro) {
-                warning.classList.add('show');
-                document.querySelectorAll('.menu-item').forEach(item => {
-                    if (!item.onclick.toString().includes('showEarnStars') && 
-                        !item.onclick.toString().includes('activatePro')) {
-                        item.classList.add('locked');
-                    }
-                });
-            } else {
-                warning.classList.remove('show');
-                document.querySelectorAll('.menu-item').forEach(item => {
-                    item.classList.remove('locked');
-                });
+        window.onload = () => {
+            try {
+                const saved = localStorage.getItem('islam_mz_user_v2');
+                if(saved) {
+                    user = JSON.parse(saved);
+                    updateUI();
+                    showApp();
+                }
+            } catch (e) {
+                console.log("Iniciando sem dados salvos devido a restrições do navegador.");
             }
+
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 1000);
+        };
+
+        function login() {
+            const nameEl = document.getElementById('userName');
+            const phoneEl = document.getElementById('userPhone');
+            const btn = document.getElementById('loginBtn');
+            
+            const name = nameEl.value.trim();
+            const phone = phoneEl.value.trim();
+            
+            if(name.length < 3) {
+                alert("Por favor, digite o seu nome.");
+                nameEl.focus();
+                return;
+            }
+            if(phone.length < 8) {
+                alert("Por favor, digite um número de celular válido.");
+                phoneEl.focus();
+                return;
+            }
+
+            // Feedback visual de clique
+            btn.innerText = "ENTRANDO...";
+            btn.style.opacity = "0.7";
+
+            setTimeout(() => {
+                user.name = name;
+                user.phone = phone;
+                saveToStorage();
+                updateUI();
+                showApp();
+            }, 500);
+        }
+
+        function showApp() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('app').classList.add('active');
+        }
+
+        function handleMenu(action) {
+            // Regra de Gasto de Estrelas
+            if(!user.isPro) {
+                if(user.stars < 7) {
+                    showToast();
+                    return;
+                }
+                user.stars -= 7;
+                saveToStorage();
+                updateUI();
+            }
+
+            switch(action) {
+                case 'quran':
+                    window.open('https://quran.com/1', '_blank');
+                    break;
+                case 'pro':
+                    showModal('proModal');
+                    break;
+                case 'tasbih':
+                    alert("Tasbih iniciado!");
+                    break;
+                default:
+                    alert("Funcionalidade em desenvolvimento.");
+            }
+        }
+
+        function verifyPro() {
+            const input = document.getElementById('proCode').value.toUpperCase().trim();
+            const last4 = user.phone.slice(-4);
+            let correctCode = "";
+            
+            for(let digit of last4) {
+                correctCode += CODE_MAP[digit] || "X";
+            }
+
+            if(input === correctCode) {
+                user.isPro = true;
+                user.stars = 999999;
+                saveToStorage();
+                updateUI();
+                hideModal('proModal');
+                alert("MashaAllah! Nível PRO activado.");
+            } else {
+                alert("Código incorreto! Tente converter os últimos 4 dígitos: " + last4);
+            }
+        }
+
+        function updateUI() {
+            const label = document.getElementById('userLabel');
+            const star = document.getElementById('starDisplay');
+            const badge = document.getElementById('proBadge');
+            
+            if(label) label.innerText = user.name.split(' ')[0] || "Usuário";
+            if(star) star.innerText = Math.floor(user.stars);
+            if(badge) badge.style.display = user.isPro ? 'block' : 'none';
+        }
+
+        function showModal(id) { document.getElementById(id).classList.add('active'); }
+        function hideModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function showToast() {
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
 
         function logout() {
-            currentUser = null;
-            userData = null;
-            location.reload();
-        }
-
-        // ============================================
-        // APP NAVIGATION
-        // ============================================
-        function showApp() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('register-screen').classList.add('hidden');
-            document.getElementById('app-container').classList.add('active');
-            document.getElementById('bottom-nav').style.display = 'flex';
-            document.getElementById('loader').classList.add('hidden');
-            
-            initPrayerTimes();
-            loadHadith();
-            initChat();
-            loadQuiz();
-        }
-
-        function showScreen(screenId) {
-            if (screenId !== 'main' && userData && userData.stars <= 0 && !userData.nivelPro) {
-                showEarnStars();
-                return;
-            }
-
-            if (screenId !== 'main' && userData && !userData.nivelPro) {
-                deductStar(1);
-            }
-
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('app-container').classList.remove('active');
-            
-            if (screenId === 'main') {
-                document.getElementById('app-container').classList.add('active');
-            } else {
-                document.getElementById(screenId).classList.add('active');
-            }
-            
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        }
-
-        // ============================================
-        // PRAYER TIMES
-        // ============================================
-        function initPrayerTimes() {
-            db.ref('prayerTimes').on('value', snapshot => {
-                const times = snapshot.val() || {
-                    fajr: '04:30',
-                    duhr: '12:15',
-                    asr: '15:30',
-                    maghrib: '18:00',
-                    isha: '19:30'
-                };
-                updatePrayerCountdown(times);
-            });
-        }
-
-        function updatePrayerCountdown(times) {
-            const prayers = [
-                { name: 'Fajr', time: times.fajr },
-                { name: 'Duhr', time: times.duhr },
-                { name: 'Asr', time: times.asr },
-                { name: 'Maghrib', time: times.maghrib },
-                { name: 'Isha', time: times.isha }
-            ];
-
-            function update() {
-                const now = new Date();
-                const currentTime = now.getHours() * 60 + now.getMinutes();
-                
-                let currentPrayer = null;
-                let nextPrayer = null;
-                let minDiff = Infinity;
-
-                for (let i = 0; i < prayers.length; i++) {
-                    const [h, m] = prayers[i].time.split(':').map(Number);
-                    const prayerTime = h * 60 + m;
-                    const diff = prayerTime - currentTime;
-
-                    if (diff > 0 && diff < minDiff) {
-                        minDiff = diff;
-                        nextPrayer = prayers[i];
-                    }
-                    
-                    if (diff <= 0 && diff > -60) {
-                        currentPrayer = prayers[i];
-                    }
-                }
-
-                if (!nextPrayer) {
-                    const [h, m] = prayers[0].time.split(':').map(Number);
-                    const tomorrowPrayer = h * 60 + m + 24 * 60;
-                    minDiff = tomorrowPrayer - currentTime;
-                    nextPrayer = prayers[0];
-                }
-
-                if (currentPrayer) {
-                    document.getElementById('current-prayer-name').textContent = 
-                        'Hora do ' + currentPrayer.name;
-                    document.getElementById('azan-btn').classList.add('show');
-                } else {
-                    document.getElementById('current-prayer-name').textContent = 
-                        'Próximo Salat';
-                    document.getElementById('azan-btn').classList.remove('show');
-                }
-
-                document.getElementById('next-prayer-name').textContent = 
-                    nextPrayer.name + ' às ' + nextPrayer.time;
-
-                const hours = Math.floor(minDiff / 60);
-                const minutes = minDiff % 60;
-                const seconds = 60 - now.getSeconds();
-                
-                document.getElementById('countdown').textContent = 
-                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-                if (minDiff === 15 && !userData?.lastNotified) {
-                    showNotification('⏰ ' + nextPrayer.name + ' em 15 minutos!');
-                }
-            }
-
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(update, 1000);
-            update();
-        }
-
-        function playAzan() {
-            if (!azanAudio) {
-                azanAudio = new Audio('https://www.dropbox.com/scl/fi/khfvlutda92d8nec8xcrc/azan1.mp3?rlkey=vqzb4c8dz4mloqbxb99zwe3lr&st=48gmfhmg&raw=1');
-            }
-            azanAudio.play();
-        }
-
-        function showNotification(message) {
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('Islam Moçambique', { body: message });
-            } else {
-                alert(message);
+            if(confirm("Deseja sair?")) {
+                try { localStorage.clear(); } catch(e) {}
+                location.reload();
             }
         }
-
-        if ('Notification' in window) {
-            Notification.requestPermission();
-        }
-
-        // ============================================
-        // HADITH
-        // ============================================
-        function loadHadith() {
-            const today = new Date().toDateString();
-            
-            db.ref('hadiths').once('value', snapshot => {
-                const hadiths = snapshot.val();
-                if (hadiths) {
-                    const keys = Object.keys(hadiths);
-                    const index = new Date().getDate() % keys.length;
-                    const hadith = hadiths[keys[index]];
-                    
-                    document.getElementById('hadith-text').textContent = '"' + hadith.text + '"';
-                    document.getElementById('hadith-source').textContent = '— ' + hadith.source;
-                }
-            });
-        }
-
-        // ============================================
-        // TASBIH
-        // ============================================
-        const dhikrData = {
-            'subhanallah': { arabic: 'سُبْحَانَ اللّٰه', translation: 'SubhanAllah (Glorificado seja Allah)' },
-            'alhamdulillah': { arabic: 'ٱلْحَمْدُ لِلّٰه', translation: 'Alhamdulillah (Louvado seja Allah)' },
-            'la-ilaha': { arabic: 'لَا إِلٰهَ إِلَّا اللّٰه', translation: 'La ilaha illa Allah (Não há divindade além de Allah)' },
-            'allahu-akbar': { arabic: 'ٱللّٰهُ أَكْبَر', translation: 'Allahu Akbar (Allah é o Maior)' },
-            'la-hawla': { arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ', translation: 'La hawla wa la quwwata illa billah' }
-        };
-
-        function changeDhikr() {
-            const select = document.getElementById('dhikr-select');
-            const dhikr = dhikrData[select.value];
-            document.getElementById('tasbih-arabic').textContent = dhikr.arabic;
-            document.getElementById('tasbih-translation').textContent = dhikr.translation;
-            resetTasbih();
-        }
-
-        function countTasbih() {
-            tasbihCount++;
-            document.getElementById('tasbih-count').textContent = tasbihCount;
-            
-            if (navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-            
-            if (tasbihCount === 100) {
-                alert('MashaAllah! Completou 100 dhikr! 🎉');
-                if (!userData?.nivelPro) {
-                    addStars(5);
-                }
-            }
-        }
-
-        function resetTasbih() {
-            tasbihCount = 0;
-            document.getElementById('tasbih-count').textContent = '0';
-        }
-
-        // ============================================
-        // CHAT
-        // ============================================
-        function initChat() {
-            const messagesDiv = document.getElementById('chat-messages');
-            
-            db.ref('chat').limitToLast(50).on('child_added', snapshot => {
-                const msg = snapshot.val();
-                displayMessage(msg);
-            });
-        }
-
-        function displayMessage(msg) {
-            const messagesDiv = document.getElementById('chat-messages');
-            const isOwn = msg.uid === currentUser?.uid;
-            
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'chat-message ' + (isOwn ? 'own' : '');
-            msgDiv.innerHTML = `
-                <div class="message-sender">${msg.name}</div>
-                <div class="message-bubble">${msg.text}</div>
-            `;
-            
-            messagesDiv.appendChild(msgDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            
-            if (!text || !currentUser) return;
-            
-            if (userData.stars <= 0 && !userData.nivelPro) {
-                showEarnStars();
-                return;
-            }
-            
-            db.ref('chat').push({
-                uid: currentUser.uid,
-                name: userData.name,
-                text: text,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
-            
-            input.value = '';
-            
-            if (!userData.nivelPro) {
-                deductStar(1);
-            }
-        }
-
-        document.getElementById('chat-input')?.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') sendChatMessage();
-        });
-
-        // ============================================
-        // QUIZ
-        // ============================================
-        const quizQuestions = [
-            {
-                question: 'Quantos pilares tem o Islam?',
-                options: ['3', '4', '5', '6'],
-                correct: 2
-            },
-            {
-                question: 'Quem é o último profeta enviado por Allah?',
-                options: ['Moisés', 'Jesus', 'Muhammad (S.A.W)', 'Abraão'],
-                correct: 2
-            },
-            {
-                question: 'Qual é o primeiro mês do calendário islâmico?',
-                options: ['Ramadã', 'Muharram', 'Shawwal', 'Dhul-Hijjah'],
-                correct: 1
-            },
-            {
-                question: 'Quantas vezes por dia um muçulmano reza?',
-                options: ['3', '4', '5', '6'],
-                correct: 2
-            },
-            {
-                question: 'Para onde os muçulmanos se viram para orar?',
-                options: ['Meca', 'Médina', 'Jerusalém', 'Cairo'],
-                correct: 0
-            }
-        ];
-
-        function loadQuiz() {
-            showQuizQuestion();
-        }
-
-        function showQuizQuestion() {
-            const q = quizQuestions[currentQuizQuestion];
-            document.getElementById('quiz-question').textContent = 
-                (currentQuizQuestion + 1) + '. ' + q.question;
-            
-            const optionsDiv = document.getElementById('quiz-options');
-            optionsDiv.innerHTML = '';
-            
-            q.options.forEach((opt, idx) => {
-                const btn = document.createElement('button');
-                btn.className = 'quiz-option';
-                btn.textContent = opt;
-                btn.onclick = () => answerQuiz(idx);
-                optionsDiv.appendChild(btn);
-            });
-        }
-
-        function answerQuiz(selected) {
-            const q = quizQuestions[currentQuizQuestion];
-            const options = document.querySelectorAll('.quiz-option');
-            
-            options[q.correct].classList.add('correct');
-            
-            if (selected === q.correct) {
-                quizScore += 10;
-                if (!userData?.nivelPro) {
-                    addStars(5);
-                }
-                setTimeout(() => {
-                    alert('Correto! +5 estrelas! 🎉');
-                }, 500);
-            } else {
-                options[selected].classList.add('wrong');
-                setTimeout(() => {
-                    alert('Resposta incorreta. A correta era: ' + q.options[q.correct]);
-                }, 500);
-            }
-            
-            document.getElementById('quiz-score').textContent = 'Pontuação: ' + quizScore;
-            
-            setTimeout(() => {
-                currentQuizQuestion = (currentQuizQuestion + 1) % quizQuestions.length;
-                showQuizQuestion();
-            }, 1500);
-        }
-
-        // ============================================
-        // STARS SYSTEM
-        // ============================================
-        function addStars(amount) {
-            if (!currentUser) return;
-            const newStars = Math.min(100, (userData.stars || 0) + amount);
-            db.ref('users/' + currentUser.uid + '/stars').set(newStars);
-        }
-
-        function deductStar(amount) {
-            if (!currentUser || userData.nivelPro) return;
-            const newStars = Math.max(0, (userData.stars || 0) - amount);
-            db.ref('users/' + currentUser.uid + '/stars').set(newStars);
-        }
-
-        function showEarnStars() {
-            document.getElementById('earn-stars-modal').classList.add('show');
-        }
-
-        function closeEarnStars() {
-            document.getElementById('earn-stars-modal').classList.remove('show');
-        }
-
-        function shareWebsite() {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Islam Moçambique',
-                    text: 'Venha conhecer o Islam Moçambique App!',
-                    url: window.location.href
-                }).then(() => {
-                    addStars(5);
-                    alert('Obrigado por partilhar! +5 estrelas! ⭐');
-                    closeEarnStars();
-                });
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                addStars(5);
-                alert('Link copiado! Partilhe com 5 amigos. +5 estrelas! ⭐');
-                closeEarnStars();
-            }
-        }
-
-        function watchAd() {
-            closeEarnStars();
-            const adContainer = document.getElementById('ad-container');
-            const adTimer = document.getElementById('ad-timer');
-            const adCloseBtn = document.getElementById('ad-close-btn');
-            
-            adContainer.classList.add('show');
-            let seconds = 10;
-            
-            const timer = setInterval(() => {
-                seconds--;
-                adTimer.textContent = seconds;
-                
-                if (seconds <= 0) {
-                    clearInterval(timer);
-                    adCloseBtn.classList.add('show');
-                }
-            }, 1000);
-        }
-
-        function closeAd() {
-            document.getElementById('ad-container').classList.remove('show');
-            document.getElementById('ad-close-btn').classList.remove('show');
-            addStars(10);
-            alert('Obrigado! +10 estrelas! ⭐');
-        }
-
-        function activatePro() {
-            const confirm = window.confirm('Ativar Nível Pro por 25 MTN/mês?\n\nBenefícios:\n- Estrelas ilimitadas\n- Acesso total ao app\n- Sem anúncios');
-            
-            if (confirm) {
-                db.ref('users/' + currentUser.uid).update({
-                    nivelPro: true,
-                    proExpiry: Date.now() + (30 * 24 * 60 * 60 * 1000),
-                    stars: 100
-                });
-                alert('Nível Pro ativado! Barakallahu fik! 🎉');
-                closeEarnStars();
-            }
-        }
-
-        // ============================================
-        // WEBVIEW
-        // ============================================
-        function openWebview(url, title) {
-            if (userData && userData.stars <= 0 && !userData.nivelPro) {
-                showEarnStars();
-                return;
-            }
-            
-            document.getElementById('webview-title').textContent = title;
-            document.getElementById('webview-frame').src = url;
-            document.getElementById('webview-container').classList.add('show');
-            
-            if (!userData?.nivelPro) {
-                deductStar(1);
-            }
-        }
-
-        function closeWebview() {
-            document.getElementById('webview-container').classList.remove('show');
-            document.getElementById('webview-frame').src = '';
-        }
-
-        function openLink(url) {
-            window.open(url, '_blank');
-        }
-
-        // ============================================
-        // INIT
-        // ============================================
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
-            }, 1500);
-        });
     </script>
 </body>
 </html>
