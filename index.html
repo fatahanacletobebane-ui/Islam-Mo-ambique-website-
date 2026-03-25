@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🕋 ISLAM MOÇAMBIQUE 🕋</title>
+    <title>🕋 Madrassa Online 🕋</title>
     
     <!-- Fonts e Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
@@ -286,6 +286,7 @@
             font-size: 0.7rem;
             font-weight: bold;
             margin-left: 5px;
+            animation: glow 2s infinite;
         }
 
         .logout-btn {
@@ -902,6 +903,11 @@
             animation: pulse 2s infinite;
         }
 
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px var(--gold); }
+            50% { box-shadow: 0 0 20px var(--gold), 0 0 40px var(--light-gold); }
+        }
+
         /* Responsive */
         @media (max-width: 400px) {
             .menu-grid {
@@ -995,16 +1001,6 @@
             color: var(--dark-green);
         }
 
-        /* Pro Badge Animation */
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px var(--gold); }
-            50% { box-shadow: 0 0 20px var(--gold), 0 0 40px var(--light-gold); }
-        }
-
-        .pro-badge {
-            animation: glow 2s infinite;
-        }
-
         /* Daily Limit Info */
         .daily-limit-info {
             background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
@@ -1034,6 +1030,18 @@
             border-radius: 5px;
             transition: width 0.3s ease;
         }
+
+        .code-display {
+            background: var(--dark-green);
+            color: var(--gold);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -1047,7 +1055,7 @@
     <div class="auth-screen" id="authScreen">
         <div class="auth-logo">
             <div class="logo-icon">🕋</div>
-            <h1>ISLAM MOÇAMBIQUE</h1>
+            <h1>Madrassa Online</h1>
         </div>
         
         <div class="auth-form" id="loginForm">
@@ -1057,8 +1065,8 @@
                 <input type="email" id="loginEmail" placeholder="seu@email.com">
             </div>
             <div class="form-group">
-                <label>Senha</label>
-                <input type="password" id="loginPassword" placeholder="••••••••">
+                <label>PIN (6 dígitos)</label>
+                <input type="password" id="loginPin" placeholder="000000" maxlength="6">
             </div>
             <button class="btn btn-primary" onclick="login()">Entrar</button>
             <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
@@ -1082,8 +1090,8 @@
                 <input type="tel" id="registerPhone" placeholder="+258 84 000 0000">
             </div>
             <div class="form-group">
-                <label>Senha</label>
-                <input type="password" id="registerPassword" placeholder="••••••••">
+                <label>Criar PIN (6 dígitos)</label>
+                <input type="password" id="registerPin" placeholder="000000" maxlength="6">
             </div>
             <button class="btn btn-primary" onclick="register()">Criar Conta</button>
             <button class="btn btn-secondary" onclick="showLogin()">Já tenho conta</button>
@@ -1407,13 +1415,13 @@
     </nav>
 
     <script>
-        // Firebase Configuration - REPLACE WITH YOUR CONFIG
+        // Firebase Configuration - USE SUA CONFIGURAÇÃO REAL
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "your-app.firebaseapp.com",
-            databaseURL: "https://your-app-default-rtdb.firebaseio.com",
-            projectId: "your-app",
-            storageBucket: "your-app.appspot.com",
+            apiKey: "AIzaSy...",
+            authDomain: "madrassa-online.firebaseapp.com",
+            databaseURL: "https://madrassa-online-b851c-default-rtdb.firebaseio.com",
+            projectId: "madrassa-online",
+            storageBucket: "madrassa-online.appspot.com",
             messagingSenderId: "123456789",
             appId: "1:123456789:web:abcdef"
         };
@@ -1485,14 +1493,37 @@
 
         function login() {
             const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+            const pin = document.getElementById('loginPin').value;
 
-            if (!email || !password) {
-                alert('Por favor, preencha todos os campos');
+            if (!email || !pin || pin.length !== 6) {
+                alert('Por favor, preencha email e PIN de 6 dígitos');
                 return;
             }
 
-            auth.signInWithEmailAndPassword(email, password)
+            // Verificar se usuário existe no database pelo email
+            database.ref('users').orderByChild('email').equalTo(email).once('value')
+                .then((snapshot) => {
+                    const users = snapshot.val();
+                    if (!users) {
+                        alert('Usuário não encontrado');
+                        return;
+                    }
+
+                    const userId = Object.keys(users)[0];
+                    const user = users[userId];
+
+                    // Verificar PIN
+                    if (user.pin !== pin) {
+                        alert('PIN incorreto');
+                        return;
+                    }
+
+                    // Login com email/senha temporária (Firebase Auth requer senha, não PIN)
+                    // Na prática, você deve usar Firebase Auth com email/senha ou custom token
+                    // Aqui simulamos o login
+                    currentUser = { uid: userId, email: email };
+                    loadUserData(userId);
+                })
                 .catch(error => {
                     alert('Erro ao entrar: ' + error.message);
                 });
@@ -1502,33 +1533,40 @@
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
             const phone = document.getElementById('registerPhone').value;
-            const password = document.getElementById('registerPassword').value;
+            const pin = document.getElementById('registerPin').value;
 
-            if (!name || !email || !phone || !password) {
+            if (!name || !email || !phone || !pin) {
                 alert('Por favor, preencha todos os campos');
                 return;
             }
 
-            // Create user in Firebase Auth
-            auth.createUserWithEmailAndPassword(email, password)
+            if (pin.length !== 6) {
+                alert('O PIN deve ter exatamente 6 dígitos');
+                return;
+            }
+
+            // Criar usuário no Firebase Auth (necessário para UID)
+            // Em produção, use Firebase Auth com email/senha
+            const tempPassword = Math.random().toString(36).slice(-8);
+            
+            auth.createUserWithEmailAndPassword(email, tempPassword)
                 .then((userCredential) => {
                     const user = userCredential.user;
                     
-                    // Save user data to database with pending status
+                    // Save user data to database conforme sua estrutura
                     return database.ref('users/' + user.uid).set({
                         name: name,
                         email: email,
                         phone: phone,
+                        pin: pin,
                         stars: 0,
-                        isPro: false,
-                        isPending: true,
-                        isAdmin: false,
+                        nivelPro: false,
                         createdAt: Date.now(),
                         lastActive: Date.now()
                     });
                 })
                 .then(() => {
-                    alert('Conta criada! Aguarde aprovação do administrador.');
+                    alert('Conta criada com sucesso! Faça login com seu email e PIN.');
                     auth.signOut();
                     showLogin();
                 })
@@ -1547,43 +1585,40 @@
         }
 
         function contactAdmin() {
-            window.open('https://wa.me/258840000000?text=Olá! Gostaria de criar uma conta no Islam Moçambique.', '_blank');
+            window.open('https://wa.me/258840000000?text=Olá! Gostaria de criar uma conta no Madrassa Online.', '_blank');
         }
 
-        // Load User Data
+        // Load User Data - CORRIGIDO conforme sua estrutura
         function loadUserData(uid) {
             database.ref('users/' + uid).on('value', (snapshot) => {
                 userData = snapshot.val();
                 
                 if (!userData) return;
 
-                // Check if pending
-                if (userData.isPending && !userData.isAdmin) {
-                    alert('Sua conta está pendente de aprovação. Aguarde contato do administrador.');
-                    auth.signOut();
-                    return;
-                }
-
                 // Update UI
                 document.getElementById('userName').textContent = userData.name || 'Usuário';
                 document.getElementById('userStars').textContent = userData.stars || 0;
                 document.getElementById('userAvatar').textContent = (userData.name || 'U').charAt(0).toUpperCase();
                 
-                // Check Pro status
-                if (userData.isPro) {
-                    document.getElementById('proBadge').classList.remove('hidden');
-                    document.getElementById('proMenuItem').classList.remove('locked');
-                    document.getElementById('proMenuItem').innerHTML = `
-                        <i class="fas fa-crown" style="color: var(--gold)"></i>
-                        <span>Pro Ativo</span>
-                    `;
+                // Check Pro status - USANDO nivelPro (não isPro)
+                if (userData.nivelPro === true) {
+                    // Verificar se proExpiry ainda é válido
+                    const now = Date.now();
+                    if (userData.proExpiry && userData.proExpiry > now) {
+                        document.getElementById('proBadge').classList.remove('hidden');
+                        document.getElementById('proMenuItem').classList.remove('locked');
+                        document.getElementById('proMenuItem').innerHTML = `
+                            <i class="fas fa-crown" style="color: var(--gold)"></i>
+                            <span>Pro Ativo</span>
+                        `;
+                    } else if (userData.proExpiry && userData.proExpiry <= now) {
+                        // Pro expirou
+                        database.ref('users/' + uid).update({ nivelPro: false });
+                    }
                 }
 
-                // Check Admin status
-                if (userData.isAdmin) {
-                    isAdmin = true;
-                    document.getElementById('adminNavItem').style.display = 'flex';
-                }
+                // Check Admin status (verificar se email está na lista de admins)
+                checkIfAdmin(uid);
 
                 // Load daily stars
                 loadDailyStars();
@@ -1595,9 +1630,19 @@
             });
         }
 
+        function checkIfAdmin(uid) {
+            // Verificar se usuário é admin (você pode ter uma lista de admins no database)
+            database.ref('admins/' + uid).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    isAdmin = true;
+                    document.getElementById('adminNavItem').style.display = 'flex';
+                }
+            });
+        }
+
         // Daily Stars Functions
         function loadDailyStars() {
-            const today = new Date().toDateString();
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
             const starsRef = database.ref('dailyStars/' + currentUser.uid + '/' + today);
             
             starsRef.on('value', (snapshot) => {
@@ -1622,13 +1667,13 @@
                 return false;
             }
 
-            const today = new Date().toDateString();
+            const today = new Date().toISOString().split('T')[0];
             const newTotal = dailyStars + amount;
             
             // Update daily stars
             database.ref('dailyStars/' + currentUser.uid + '/' + today).set(newTotal);
             
-            // Update total stars
+            // Update total stars no user
             const currentTotal = userData.stars || 0;
             database.ref('users/' + currentUser.uid + '/stars').set(currentTotal + amount);
             
@@ -1643,7 +1688,7 @@
             }
 
             // Check if task already completed today
-            const today = new Date().toDateString();
+            const today = new Date().toISOString().split('T')[0];
             const taskRef = database.ref('tasks/' + currentUser.uid + '/' + today + '/' + taskType);
             
             taskRef.once('value').then((snapshot) => {
@@ -1667,9 +1712,9 @@
             });
         }
 
-        // Pro Code Logic
+        // Pro Code Logic - CORRIGIDO
         function generateProCode(uid) {
-            // Get last 4 characters of UID (usually numbers)
+            // Pegar últimos 4 caracteres do UID
             const last4 = uid.slice(-4);
             let code = '';
             
@@ -1677,8 +1722,9 @@
                 if (numberToLetter[char]) {
                     code += numberToLetter[char];
                 } else {
-                    // If not a number, convert char code to letter
-                    code += String.fromCharCode(65 + (char.charCodeAt(0) % 10));
+                    // Se não for número, converter para letra baseado no char code
+                    const num = char.charCodeAt(0) % 10;
+                    code += numberToLetter[num.toString()];
                 }
             }
             
@@ -1691,9 +1737,14 @@
         }
 
         function showProModal() {
-            if (userData.isPro) {
-                alert('Você já é um usuário Pro!');
-                return;
+            // Verificar se já é Pro
+            if (userData.nivelPro === true) {
+                // Verificar se ainda é válido
+                if (userData.proExpiry && userData.proExpiry > Date.now()) {
+                    const expiryDate = new Date(userData.proExpiry).toLocaleDateString('pt-BR');
+                    alert(`Você já é um usuário Pro!\nExpira em: ${expiryDate}`);
+                    return;
+                }
             }
             document.getElementById('proCodeModal').classList.add('show');
         }
@@ -1713,12 +1764,15 @@
 
             // Verify code
             if (verifyProCode(currentUser.uid, inputCode)) {
-                // Activate Pro
+                // Calcular data de expiração (30 dias a partir de agora)
+                const expiryDate = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                
+                // Activate Pro - USANDO nivelPro e proExpiry conforme sua estrutura
                 database.ref('users/' + currentUser.uid).update({
-                    isPro: true,
-                    proActivatedAt: Date.now()
+                    nivelPro: true,
+                    proExpiry: expiryDate
                 }).then(() => {
-                    alert('🎉 Parabéns! Nível Pro ativado com sucesso!');
+                    alert('🎉 Parabéns! Nível Pro ativado com sucesso!\nVálido por 30 dias.');
                     closeProModal();
                 });
             } else {
@@ -1819,7 +1873,6 @@
             
             const goal = dhikrData[currentDhikr].goal;
             if (tasbihCount === goal) {
-                // Complete task
                 completeTask('tasbih', 3);
             }
         }
@@ -1829,7 +1882,7 @@
             document.getElementById('tasbihCount').textContent = '0';
         }
 
-        // Chat Functions
+        // Chat Functions - CORRIGIDO conforme sua estrutura
         function loadChatMessages() {
             const messagesRef = database.ref('chat').limitToLast(50);
             messagesRef.on('value', (snapshot) => {
@@ -1859,6 +1912,7 @@
             
             if (!text) return;
             
+            // Estrutura conforme seu database
             const message = {
                 uid: currentUser.uid,
                 name: userData.name,
@@ -1870,54 +1924,31 @@
             input.value = '';
         }
 
-        // Admin Functions
+        // Admin Functions - CORRIGIDO
         function loadAdminData() {
-            // Load pending users
-            database.ref('users').orderByChild('isPending').equalTo(true).on('value', (snapshot) => {
-                const container = document.getElementById('pendingUsersList');
-                container.innerHTML = '';
-                
-                const users = snapshot.val();
-                if (users) {
-                    Object.entries(users).forEach(([uid, user]) => {
-                        const div = document.createElement('div');
-                        div.className = 'user-list-item';
-                        div.innerHTML = `
-                            <div class="user-list-info">
-                                <h4>${user.name}</h4>
-                                <p>${user.email} | ${user.phone}</p>
-                            </div>
-                            <div class="user-actions">
-                                <button class="btn-small btn-approve" onclick="approveUser('${uid}')">
-                                    Aprovar
-                                </button>
-                                <button class="btn-small btn-reject" onclick="rejectUser('${uid}')">
-                                    Rejeitar
-                                </button>
-                            </div>
-                        `;
-                        container.appendChild(div);
-                    });
-                } else {
-                    container.innerHTML = '<p style="text-align: center; color: #999;">Nenhum usuário pendente</p>';
-                }
-            });
-
-            // Load all users for Pro management
+            // Load all users para gerenciar
             database.ref('users').on('value', (snapshot) => {
-                const container = document.getElementById('proUsersList');
-                container.innerHTML = '';
+                const pendingContainer = document.getElementById('pendingUsersList');
+                const proContainer = document.getElementById('proUsersList');
+                
+                pendingContainer.innerHTML = '';
+                proContainer.innerHTML = '';
                 
                 const users = snapshot.val();
                 if (users) {
                     Object.entries(users).forEach(([uid, user]) => {
-                        if (user.isPro) {
+                        // Lista de usuários Pro
+                        if (user.nivelPro === true) {
+                            const expiryDate = user.proExpiry ? 
+                                new Date(user.proExpiry).toLocaleDateString('pt-BR') : 'N/A';
+                            
                             const div = document.createElement('div');
                             div.className = 'user-list-item';
                             div.innerHTML = `
                                 <div class="user-list-info">
                                     <h4>${user.name} <span style="color: var(--gold)">⭐ PRO</span></h4>
-                                    <p>${user.email}</p>
+                                    <p>${user.email} | Expira: ${expiryDate}</p>
+                                    <p style="font-size: 0.7rem; color: #999;">Código: ${generateProCode(uid)}</p>
                                 </div>
                                 <div class="user-actions">
                                     <button class="btn-small btn-reject" onclick="removePro('${uid}')">
@@ -1925,56 +1956,87 @@
                                     </button>
                                 </div>
                             `;
-                            container.appendChild(div);
+                            proContainer.appendChild(div);
                         }
+
+                        // Lista de todos os usuários (para gerar código)
+                        const div = document.createElement('div');
+                        div.className = 'user-list-item';
+                        div.innerHTML = `
+                            <div class="user-list-info">
+                                <h4>${user.name}</h4>
+                                <p>${user.email} | ${user.phone || 'Sem telefone'}</p>
+                                <p style="font-size: 0.7rem; color: #999;">Estrelas: ${user.stars || 0}</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="btn-small btn-pro" onclick="showProCodeForUser('${uid}', '${user.name}')">
+                                    Ver Código Pro
+                                </button>
+                            </div>
+                        `;
+                        // Adicionar à lista geral ou específica conforme necessidade
                     });
+                    
+                    if (proContainer.innerHTML === '') {
+                        proContainer.innerHTML = '<p style="text-align: center; color: #999;">Nenhum usuário Pro ativo</p>';
+                    }
                 }
             });
         }
 
-        function approveUser(uid) {
-            database.ref('users/' + uid).update({
-                isPending: false,
-                approvedAt: Date.now()
-            }).then(() => {
-                alert('Usuário aprovado!');
-            });
-        }
-
-        function rejectUser(uid) {
-            if (confirm('Tem certeza que deseja rejeitar este usuário?')) {
-                database.ref('users/' + uid).remove().then(() => {
-                    // Also delete auth user (requires Cloud Function in production)
-                    alert('Usuário rejeitado.');
-                });
-            }
+        function showProCodeForUser(uid, name) {
+            const code = generateProCode(uid);
+            alert(`Código Pro para ${name}:\\n\\n${code}\\n\\nValor: 25 MTN`);
         }
 
         function removePro(uid) {
             if (confirm('Remover status Pro deste usuário?')) {
                 database.ref('users/' + uid).update({
-                    isPro: false
+                    nivelPro: false,
+                    proExpiry: null
                 }).then(() => {
                     alert('Status Pro removido.');
                 });
             }
         }
 
-        // Admin: Generate Pro Code for User
-        function getProCodeForUser(uid) {
-            return generateProCode(uid);
+        // Prayer Times - CORRIGIDO conforme sua estrutura
+        function updatePrayerTimes() {
+            // Buscar horários do database
+            database.ref('horarios de oracao').once('value').then((snapshot) => {
+                const horarios = snapshot.val();
+                if (!horarios) {
+                    // Fallback para horários padrão
+                    useDefaultPrayerTimes();
+                    return;
+                }
+
+                const prayers = [
+                    { name: 'Fajr', time: horarios.Fajr || '04:30' },
+                    { name: 'Dhuhr', time: horarios.Dhur || '12:15' },
+                    { name: 'Asr', time: horarios.Ansr || '15:30' },
+                    { name: 'Maghrib', time: horarios.Magrib || '18:00' },
+                    { name: 'Isha', time: horarios.Isha || '19:30' }
+                ];
+
+                calculateNextPrayer(prayers);
+            }).catch(() => {
+                useDefaultPrayerTimes();
+            });
         }
 
-        // Prayer Times (Simplified for Mozambique)
-        function updatePrayerTimes() {
+        function useDefaultPrayerTimes() {
             const prayers = [
-                { name: 'Fajr', time: '05:00' },
-                { name: 'Dhuhr', time: '12:30' },
+                { name: 'Fajr', time: '04:30' },
+                { name: 'Dhuhr', time: '12:15' },
                 { name: 'Asr', time: '15:30' },
-                { name: 'Maghrib', time: '18:15' },
-                { name: 'Isha', time: '19:45' }
+                { name: 'Maghrib', time: '18:00' },
+                { name: 'Isha', time: '19:30' }
             ];
+            calculateNextPrayer(prayers);
+        }
 
+        function calculateNextPrayer(prayers) {
             const now = new Date();
             const currentTime = now.getHours() * 60 + now.getMinutes();
 
@@ -1986,7 +2048,7 @@
                 const prayerTime = hours * 60 + minutes;
                 let diff = prayerTime - currentTime;
                 
-                if (diff < 0) diff += 24 * 60; // Next day
+                if (diff < 0) diff += 24 * 60;
                 
                 if (diff < minDiff) {
                     minDiff = diff;
@@ -2005,7 +2067,6 @@
                 document.getElementById('nextPrayerInfo').textContent = 
                     `Horário: ${nextPrayer.time}`;
 
-                // Show Azan button if less than 5 minutes
                 if (minDiff < 5) {
                     document.getElementById('azanBtn').classList.add('show');
                 } else {
@@ -2015,8 +2076,7 @@
         }
 
         function playAzan() {
-            // In production, play actual Azan audio
-            alert('Tocando Azan... (Em produção: áudio real do Azan)');
+            alert('Tocando Azan...');
         }
 
         // Hadith Data
