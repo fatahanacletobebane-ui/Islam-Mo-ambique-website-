@@ -3,327 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🕋 ISLAM MOÇAMBIQUE 🕋</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <title>🕋 ISLAM MOÇAMBIQUE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        :root {
-            --primary-green: #1a5f4a;
-            --dark-green: #0d3d2d;
-            --light-green: #2d8a6e;
-            --gold: #d4af37;
-            --light-gold: #f4d03f;
+        :root { 
+            --p-green: #1a5f4a; 
+            --d-green: #0d3d2d; 
+            --gold: #d4af37; 
+            --white: #ffffff; 
             --cream: #f5f5dc;
-            --white: #ffffff;
-            --dark: #1a1a1a;
-            --red: #e74c3c;
-            --whatsapp: #25D366;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--cream); color: #333; overflow-x: hidden; }
+
+        /* Sistema de Telas */
+        .tela { display: none; min-height: 100vh; width: 100%; }
+        .tela.active { display: flex; flex-direction: column; }
+
+        /* Design da Tela de Registro/Login */
+        #registro-tela { 
+            background: linear-gradient(135deg, var(--d-green), var(--p-green)); 
+            align-items: center; 
+            justify-content: center; 
+            color: var(--gold); 
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+        }
+        .box-registro { 
+            background: rgba(0,0,0,0.3); 
+            padding: 30px; 
+            border-radius: 20px; 
+            width: 90%; 
+            max-width: 380px; 
+            text-align: center; 
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .box-registro h1 { font-size: 2rem; margin-bottom: 20px; letter-spacing: 2px; }
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            border: none; 
+            font-size: 1rem;
+            outline: none;
+            color: #333;
+        }
+        .btn-entrar { 
+            width: 100%; 
+            padding: 15px; 
+            background: var(--gold); 
+            color: var(--d-green); 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+            cursor: pointer; 
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Cairo', sans-serif; background-color: var(--cream); color: var(--dark); overflow-x: hidden; }
+        /* Design do App Principal */
+        header { 
+            background: var(--d-green); 
+            color: white; 
+            padding: 15px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: fixed; 
+            top: 0; 
+            width: 100%; 
+            z-index: 100;
+        }
+        .user-pill { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .stars-pill { color: var(--gold); font-weight: bold; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; }
 
-        /* Loader Inicial */
-        .loader { position: fixed; inset: 0; background: var(--dark-green); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: 0.5s; }
-        .loader.hidden { opacity: 0; pointer-events: none; }
+        .main-container { padding: 90px 20px 20px; max-width: 600px; margin: 0 auto; width: 100%; }
+        .status-card { 
+            background: var(--p-green); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            text-align: center; 
+            margin-bottom: 20px;
+        }
 
-        /* Tela de Autenticação */
-        .auth-screen { position: fixed; inset: 0; background: linear-gradient(135deg, var(--dark-green), var(--primary-green)); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; padding: 20px; }
-        .auth-screen.hidden { display: none; }
-        
-        /* Layout Principal */
-        .app-header { background: linear-gradient(135deg, var(--dark-green), var(--primary-green)); color: var(--white); padding: 15px 20px; position: fixed; top: 0; width: 100%; z-index: 1000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .app-container { display: none; padding-top: 70px; padding-bottom: 80px; }
-        .app-container.active { display: block; }
-
-        /* Barra de Status */
-        .user-stats { display: flex; align-items: center; gap: 15px; }
-        .stars-count { color: var(--gold); font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .pro-badge { background: var(--gold); color: var(--dark-green); padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
-
-        /* Menu Grid */
-        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; }
-        .menu-item { background: var(--white); border-radius: 15px; padding: 20px 10px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
-        .menu-item:active { transform: scale(0.95); background: #f0f0f0; }
-        .menu-item i { font-size: 1.8rem; color: var(--primary-green); margin-bottom: 8px; display: block; }
-        .menu-item span { font-size: 0.75rem; font-weight: 600; display: block; }
-        .menu-item.support { background: var(--gold); color: var(--dark-green); }
-        .menu-item.support i { color: var(--dark-green); }
+        /* Grid de Menu */
+        .menu-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 12px; 
+        }
+        .menu-item { 
+            background: white; 
+            padding: 20px 5px; 
+            border-radius: 15px; 
+            text-align: center; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            cursor: pointer; 
+            border: 1px solid #f0f0f0;
+        }
+        .menu-item i { font-size: 1.8rem; color: var(--p-green); margin-bottom: 8px; display: block; }
+        .menu-item span { font-size: 0.75rem; font-weight: bold; color: #555; }
+        .menu-item.btn-gold { background: var(--gold); border: none; }
 
         /* Modais */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.8); 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000; 
+            padding: 20px; 
+        }
         .modal.active { display: flex; }
-        .modal-content { background: var(--white); padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; position: relative; }
-        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; cursor: pointer; color: #888; }
-
-        /* Dados de Apoio */
-        .bank-info { text-align: left; margin: 15px 0; background: #f9f9f9; padding: 15px; border-radius: 10px; font-size: 0.85rem; }
-        .bank-info div { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
-        .bank-info strong { color: var(--primary-green); display: block; font-size: 0.7rem; text-transform: uppercase; margin-bottom: 2px; }
-
-        /* Input PRO */
-        .pro-input { width: 100%; padding: 12px; border: 2px solid var(--gold); border-radius: 10px; margin: 15px 0; font-size: 1.5rem; text-align: center; letter-spacing: 8px; text-transform: uppercase; outline: none; }
-        
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--red); color: white; padding: 12px 25px; border-radius: 30px; font-size: 0.85rem; display: none; z-index: 3000; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-
-        input { outline: none; transition: border 0.3s; }
-        input:focus { border: 2px solid var(--gold) !important; }
-        button:active { opacity: 0.8; transform: translateY(1px); }
+        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; position: relative; }
     </style>
 </head>
 <body>
 
-    <!-- Loader Inicial -->
-    <div id="loader" class="loader">
-        <i class="fas fa-kaaba fa-spin" style="font-size: 3rem; color: var(--gold);"></i>
-        <p style="color: var(--white); margin-top: 20px; font-weight: bold;">Bismillah...</p>
-    </div>
-
-    <!-- Tela de Login -->
-    <div id="authScreen" class="auth-screen">
-        <div style="text-align: center; margin-bottom: 30px; color: var(--gold);">
-            <i class="fas fa-star-and-crescent fa-4x"></i>
-            <h1 style="font-family: 'Amiri'; margin-top: 15px; font-size: 2.2rem;">Islam Moçambique</h1>
-        </div>
-        <div style="width: 100%; max-width: 320px;">
-            <input type="text" id="userName" placeholder="Nome Completo" style="width:100%; padding:15px; margin-bottom:12px; border-radius:12px; border:none; font-family: inherit; font-size: 1rem;">
-            <input type="tel" id="userPhone" placeholder="Número de Celular (8x...)" style="width:100%; padding:15px; margin-bottom:20px; border-radius:12px; border:none; font-family: inherit; font-size: 1rem;">
-            <button id="loginBtn" onclick="login()" style="width:100%; padding:16px; background:var(--gold); border:none; border-radius:12px; font-weight:bold; color:var(--dark-green); cursor: pointer; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">ENTRAR</button>
+    <!-- TELA DE REGISTRO/LOGIN -->
+    <div id="registro-tela" class="tela active">
+        <div class="box-registro">
+            <i class="fas fa-mosque fa-3x"></i>
+            <h1 style="margin-top:10px">ISLAM MZ</h1>
+            <p style="margin-bottom:20px; font-size:0.9rem">Crie a sua conta local</p>
+            <input type="text" id="reg-nome" placeholder="Nome Completo">
+            <input type="tel" id="reg-fone" placeholder="Número de Telemóvel">
+            <button class="btn-entrar" onclick="finalizarRegistro()">CRIAR CONTA E ENTRAR</button>
         </div>
     </div>
 
-    <!-- Conteúdo Principal -->
-    <div id="app" class="app-container">
-        <header class="app-header">
-            <div class="user-stats">
-                <div id="userLabel" style="font-weight: bold; font-size: 0.9rem;">Usuário</div>
-                <div class="stars-count"><i class="fas fa-star"></i> <span id="starDisplay">100</span></div>
-                <div id="proBadge" class="pro-badge" style="display:none;">PRO</div>
+    <!-- TELA PRINCIPAL -->
+    <div id="app-tela" class="tela">
+        <header>
+            <div class="user-pill">
+                <i class="fas fa-user-circle"></i>
+                <span id="ui-nome">...</span>
+                <span id="ui-pro-tag" class="tag-pro" style="display:none; background:var(--gold); color:var(--d-green); font-size:10px; padding:2px 5px; border-radius:3px">PRO</span>
             </div>
-            <button onclick="logout()" style="background:rgba(255,255,255,0.1); border:none; color:white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"><i class="fas fa-sign-out-alt"></i></button>
+            <div class="stars-pill">
+                <i class="fas fa-star"></i> <span id="ui-stars">100</span>
+            </div>
+            <button onclick="fazerLogout()" style="background:none; border:none; color:white;"><i class="fas fa-power-off"></i></button>
         </header>
 
-        <div style="padding: 20px; background: white; margin: 15px; border-radius: 20px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-            <h3 style="font-family: 'Amiri'; color: var(--primary-green); font-size: 1.4rem;">Dhikr do Dia</h3>
-            <p id="dailyHadith" style="font-style: italic; font-size: 0.95rem; margin-top: 10px; color: #555;">"A melhor caridade é dar água a quem tem sede."</p>
-        </div>
+        <div class="main-container">
+            <div class="status-card">
+                <h2 id="ui-saudacao">Assalamu Alaikum</h2>
+                <p id="ui-status-texto">Nível Básico</p>
+            </div>
 
-        <div class="menu-grid">
-            <div class="menu-item" onclick="handleMenu('quran')">
-                <i class="fas fa-book-quran"></i>
-                <span>Alcorão</span>
-            </div>
-            <div class="menu-item" onclick="handleMenu('tasbih')">
-                <i class="fas fa-clock-rotate-left"></i>
-                <span>Tasbih</span>
-            </div>
-            <div class="menu-item" onclick="handleMenu('horarios')">
-                <i class="fas fa-mosque"></i>
-                <span>Horários</span>
-            </div>
-            <div class="menu-item" onclick="handleMenu('pro')">
-                <i class="fas fa-gem" style="color: var(--gold);"></i>
-                <span>Nível PRO</span>
-            </div>
-            <div class="menu-item support" onclick="showModal('supportModal')">
-                <i class="fas fa-heart"></i>
-                <span>Apoiar</span>
-            </div>
-            <div class="menu-item" onclick="handleMenu('chat')">
-                <i class="fas fa-users"></i>
-                <span>Comunidade</span>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="executarAcao('quran')"><i class="fas fa-quran"></i><span>Alcorão</span></div>
+                <div class="menu-item" onclick="executarAcao('tasbih')"><i class="fas fa-fingerprint"></i><span>Tasbih</span></div>
+                <div class="menu-item" onclick="abrirModal('modal-pro')"><i class="fas fa-crown"></i><span>PRO</span></div>
+                <div class="menu-item btn-gold" onclick="abrirModal('modal-apoio')"><i class="fas fa-heart"></i><span>Apoiar</span></div>
+                <div class="menu-item" onclick="executarAcao('horarios')"><i class="fas fa-clock"></i><span>Horários</span></div>
+                <div class="menu-item" onclick="executarAcao('ajuda')"><i class="fas fa-info-circle"></i><span>Ajuda</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Apoio -->
-    <div id="supportModal" class="modal">
-        <div class="modal-content">
-            <i class="fas fa-times close-modal" onclick="hideModal('supportModal')"></i>
-            <h3 style="text-align: center; color: var(--primary-green); font-family: 'Amiri'; font-size: 1.5rem;">Apoiar o Projecto</h3>
-            <p style="font-size: 0.85rem; text-align: center; margin: 10px 0; color: #666;">Ajude-nos a manter o servidor activo.</p>
-            
-            <div class="bank-info">
-                <div>
-                    <strong>M-Pesa Agente Paga Fácil</strong>
-                    1228803 (BEBANE)
-                </div>
-                <div>
-                    <strong>Millennium BIM</strong>
-                    000100000012473356257
-                </div>
-                <div>
-                    <strong>NUIB</strong>
-                    201910009697381
-                </div>
-            </div>
-            <button onclick="hideModal('supportModal')" style="width:100%; padding:12px; background:var(--primary-green); color:white; border:none; border-radius:10px; font-weight: bold; cursor: pointer;">OK</button>
+    <!-- MODAL APOIO -->
+    <div id="modal-apoio" class="modal">
+        <div class="modal-box">
+            <h4>Apoiar</h4>
+            <p style="font-size:13px; margin:15px 0;">M-Pesa: 1228803 (BEBANE)<br>BIM: 000100000012473356257</p>
+            <button class="btn-entrar" onclick="fecharModal('modal-apoio')">VOLTAR</button>
         </div>
     </div>
 
-    <!-- Modal PRO -->
-    <div id="proModal" class="modal">
-        <div class="modal-content">
-            <i class="fas fa-times close-modal" onclick="hideModal('proModal')"></i>
-            <h3 style="text-align: center; font-family: 'Amiri'; font-size: 1.5rem;">Activar Modo PRO</h3>
-            <p style="font-size: 0.8rem; text-align: center; margin-top: 10px; color: #666;">Insira o código de 4 letras gerado pelo seu número.</p>
-            <input type="text" id="proCode" class="pro-input" maxlength="4" placeholder="....">
-            <button onclick="verifyPro()" style="width:100%; padding:15px; background:var(--gold); border:none; border-radius:12px; font-weight:bold; cursor: pointer;">ATIVAR AGORA</button>
-            <p style="font-size: 0.7rem; color: #999; margin-top: 15px; text-align: center;">O código corresponde aos últimos 4 dígitos do seu telefone (0=A, 1=B, 2=C...)</p>
+    <!-- MODAL PRO -->
+    <div id="modal-pro" class="modal">
+        <div class="modal-box">
+            <h4>Ativar PRO</h4>
+            <p style="font-size:11px; text-align:center">Converta os últimos 4 dígitos: 0=A, 1=B, 2=C...</p>
+            <input type="text" id="input-codigo-pro" style="border:1px solid #ddd; text-align:center; letter-spacing:5px" maxlength="4">
+            <button class="btn-entrar" onclick="validarCodigoPro()">ATIVAR</button>
+            <button onclick="fecharModal('modal-pro')" style="width:100%; border:none; background:none; margin-top:10px; color:#999">Cancelar</button>
         </div>
     </div>
-
-    <div id="toast" class="toast">⚠️ Estrelas insuficientes! (Custo: 7)</div>
 
     <script>
-        // Estado Global (Failsafe para navegadores que bloqueiam localStorage)
-        let user = {
-            name: "",
-            phone: "",
-            stars: 100,
-            isPro: false
-        };
+        let usuario = { nome: "", fone: "", estrelas: 100, isPro: false };
+        const dicionarioPro = {'0':'A','1':'B','2':'C','3':'D','4':'E','5':'F','6':'G','7':'H','8':'I','9':'J'};
 
-        const CODE_MAP = {
-            '0':'A', '1':'B', '2':'C', '3':'D', '4':'E', 
-            '5':'F', '6':'G', '7':'H', '8':'I', '9':'J'
-        };
-
-        // Função segura para guardar dados
-        function saveToStorage() {
-            try {
-                localStorage.setItem('islam_mz_user_v2', JSON.stringify(user));
-            } catch (e) {
-                console.warn("LocalStorage bloqueado. Dados salvos apenas nesta sessão.");
-            }
-        }
-
-        window.onload = () => {
-            try {
-                const saved = localStorage.getItem('islam_mz_user_v2');
-                if(saved) {
-                    user = JSON.parse(saved);
-                    updateUI();
-                    showApp();
+        // FUNÇÃO DE INICIALIZAÇÃO (O "Coração" do Login)
+        window.onload = function() {
+            const dadosSalvos = localStorage.getItem('islam_mz_v5');
+            if (dadosSalvos) {
+                usuario = JSON.parse(dadosSalvos);
+                if (usuario.nome && usuario.fone) {
+                    atualizarInterface();
+                    trocarTela('app-tela');
                 }
-            } catch (e) {
-                console.log("Iniciando sem dados salvos devido a restrições do navegador.");
             }
-
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
-            }, 1000);
         };
 
-        function login() {
-            const nameEl = document.getElementById('userName');
-            const phoneEl = document.getElementById('userPhone');
-            const btn = document.getElementById('loginBtn');
-            
-            const name = nameEl.value.trim();
-            const phone = phoneEl.value.trim();
-            
-            if(name.length < 3) {
-                alert("Por favor, digite o seu nome.");
-                nameEl.focus();
-                return;
-            }
-            if(phone.length < 8) {
-                alert("Por favor, digite um número de celular válido.");
-                phoneEl.focus();
+        function finalizarRegistro() {
+            const n = document.getElementById('reg-nome').value.trim();
+            const f = document.getElementById('reg-fone').value.trim();
+
+            if (n.length < 2 || f.length < 5) {
+                alert("Por favor, preencha o nome e o número corretamente.");
                 return;
             }
 
-            // Feedback visual de clique
-            btn.innerText = "ENTRANDO...";
-            btn.style.opacity = "0.7";
+            usuario.nome = n;
+            usuario.fone = f;
+            usuario.estrelas = 100;
+            usuario.isPro = false;
 
-            setTimeout(() => {
-                user.name = name;
-                user.phone = phone;
-                saveToStorage();
-                updateUI();
-                showApp();
-            }, 500);
+            salvarDados();
+            atualizarInterface();
+            trocarTela('app-tela');
         }
 
-        function showApp() {
-            document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('app').classList.add('active');
-        }
-
-        function handleMenu(action) {
-            // Regra de Gasto de Estrelas
-            if(!user.isPro) {
-                if(user.stars < 7) {
-                    showToast();
+        function executarAcao(tipo) {
+            if (!usuario.isPro) {
+                if (usuario.estrelas < 7) {
+                    alert("Estrelas insuficientes! Custo: 7 estrelas.");
                     return;
                 }
-                user.stars -= 7;
-                saveToStorage();
-                updateUI();
+                usuario.estrelas -= 7;
+                salvarDados();
+                atualizarInterface();
             }
 
-            switch(action) {
-                case 'quran':
-                    window.open('https://quran.com/1', '_blank');
-                    break;
-                case 'pro':
-                    showModal('proModal');
-                    break;
-                case 'tasbih':
-                    alert("Tasbih iniciado!");
-                    break;
-                default:
-                    alert("Funcionalidade em desenvolvimento.");
-            }
+            if (tipo === 'quran') window.open('https://quran.com/pt', '_blank');
+            else alert("Funcionalidade em breve!");
         }
 
-        function verifyPro() {
-            const input = document.getElementById('proCode').value.toUpperCase().trim();
-            const last4 = user.phone.slice(-4);
-            let correctCode = "";
-            
-            for(let digit of last4) {
-                correctCode += CODE_MAP[digit] || "X";
-            }
+        function validarCodigoPro() {
+            const inputVal = document.getElementById('input-codigo-pro').value.toUpperCase().trim();
+            const ultimosQuatro = usuario.fone.slice(-4);
+            let codigoEsperado = "";
+            for (let d of ultimosQuatro) codigoEsperado += dicionarioPro[d] || "";
 
-            if(input === correctCode) {
-                user.isPro = true;
-                user.stars = 999999;
-                saveToStorage();
-                updateUI();
-                hideModal('proModal');
-                alert("MashaAllah! Nível PRO activado.");
+            if (inputVal === codigoEsperado && codigoEsperado !== "") {
+                usuario.isPro = true;
+                usuario.estrelas = 99999;
+                salvarDados();
+                atualizarInterface();
+                fecharModal('modal-pro');
+                alert("Nível PRO Ativado!");
             } else {
-                alert("Código incorreto! Tente converter os últimos 4 dígitos: " + last4);
+                alert("Código errado!");
             }
         }
 
-        function updateUI() {
-            const label = document.getElementById('userLabel');
-            const star = document.getElementById('starDisplay');
-            const badge = document.getElementById('proBadge');
-            
-            if(label) label.innerText = user.name.split(' ')[0] || "Usuário";
-            if(star) star.innerText = Math.floor(user.stars);
-            if(badge) badge.style.display = user.isPro ? 'block' : 'none';
+        function salvarDados() { localStorage.setItem('islam_mz_v5', JSON.stringify(usuario)); }
+
+        function atualizarInterface() {
+            document.getElementById('ui-nome').innerText = usuario.nome.split(' ')[0];
+            document.getElementById('ui-stars').innerText = Math.floor(usuario.estrelas);
+            if (usuario.isPro) {
+                document.getElementById('ui-pro-tag').style.display = "inline-block";
+                document.getElementById('ui-status-texto').innerText = "Acesso PRO Ilimitado";
+            }
         }
 
-        function showModal(id) { document.getElementById(id).classList.add('active'); }
-        function hideModal(id) { document.getElementById(id).classList.remove('active'); }
-
-        function showToast() {
-            const t = document.getElementById('toast');
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
+        function trocarTela(id) {
+            document.querySelectorAll('.tela').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        function logout() {
-            if(confirm("Deseja sair?")) {
-                try { localStorage.clear(); } catch(e) {}
+        function abrirModal(id) { document.getElementById(id).classList.add('active'); }
+        function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function fazerLogout() {
+            if (confirm("Sair apaga os dados locais. Continuar?")) {
+                localStorage.removeItem('islam_mz_v5');
                 location.reload();
             }
         }
