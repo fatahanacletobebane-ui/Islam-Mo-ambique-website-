@@ -14,137 +14,217 @@
         }
         body { font-family: 'Cairo', sans-serif; background-color: var(--cream); overflow-x: hidden; }
         
-        /* Loader Corrigido */
+        /* Loader */
         #loader { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--dark-green); display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; z-index: 9999; 
+            position: fixed; inset: 0; background: var(--dark-green); 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; z-index: 9999; transition: 0.5s;
         }
 
-        /* Telas */
+        /* Telas de Autenticação */
         .auth-screen { position: fixed; inset: 0; background: var(--primary-green); display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 20px; }
+        .auth-box { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        /* App Principal */
         .app-container { display: none; padding-top: 70px; }
-        .hidden { display: none !important; }
-
-        /* Cabeçalho */
-        .app-header { background: var(--dark-green); color: white; padding: 15px; position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; z-index: 1000; }
+        .app-header { background: var(--dark-green); color: white; padding: 15px; position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
         
         /* Menu */
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; }
-        .menu-item { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .menu-item i { font-size: 2rem; color: var(--primary-green); margin-bottom: 10px; }
+        .menu-item { background: white; padding: 25px 15px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; }
+        .menu-item:active { transform: scale(0.95); }
+        .menu-item i { font-size: 2.2rem; color: var(--primary-green); margin-bottom: 10px; }
 
-        /* Iframe WebView */
+        /* WebView */
         #webview-container { position: fixed; inset: 0; background: white; z-index: 10001; display: none; flex-direction: column; }
-        .webview-header { background: var(--dark-green); color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        .webview-header { background: var(--dark-green); color: white; padding: 15px; display: flex; align-items: center; gap: 15px; }
         iframe { flex: 1; border: none; width: 100%; }
         
-        .btn-gold { background: var(--gold); color: var(--dark-green); border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ccc; }
+        /* UI Elements */
+        .btn-gold { background: var(--gold); color: var(--dark-green); border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-outline { background: none; border: 1px solid var(--primary-green); color: var(--primary-green); padding: 10px; border-radius: 10px; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
+        input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #ddd; outline: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <div id="loader">
         <i class="fas fa-mosque fa-3x" style="color: var(--gold); margin-bottom: 15px;"></i>
-        <p style="color: white;">Iniciando...</p>
+        <p style="color: white;">A carregar...</p>
     </div>
 
     <div class="auth-screen" id="login-screen">
-        <div style="background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 350px;">
-            <h2 style="text-align: center; margin-bottom: 20px;">Entrar</h2>
-            <input type="tel" id="login-phone" placeholder="Telemóvel (ex: 84...)">
+        <div class="auth-box">
+            <h2 style="text-align: center; color: var(--primary-green); margin-bottom: 20px;">Bem-vindo</h2>
+            <input type="tel" id="log-phone" placeholder="Número de Telefone">
+            <input type="password" id="log-pin" placeholder="PIN de 4 dígitos">
             <button class="btn-gold" onclick="entrar()">ENTRAR</button>
+            <button class="btn-outline" onclick="toggleAuth()">Não tenho conta (Registrar)</button>
+        </div>
+    </div>
+
+    <div class="auth-screen hidden" id="register-screen">
+        <div class="auth-box">
+            <h2 style="text-align: center; color: var(--primary-green); margin-bottom: 20px;">Criar Conta</h2>
+            <input type="text" id="reg-name" placeholder="Nome Completo">
+            <input type="tel" id="reg-phone" placeholder="Número de Telefone">
+            <input type="password" id="reg-pin" placeholder="Criar PIN (4 dígitos)">
+            <button class="btn-gold" onclick="registrar()">CRIAR CONTA</button>
+            <button class="btn-outline" onclick="toggleAuth()">Já tenho conta (Login)</button>
         </div>
     </div>
 
     <div class="app-container" id="app-main">
         <div class="app-header">
-            <span id="user-info">Usuário</span>
             <div>
-                <span id="user-stars">⭐ 0</span>
-                <span id="pro-tag" style="display:none; background: var(--gold); padding: 2px 5px; border-radius: 5px; font-size: 10px; margin-left:5px;">PRO</span>
+                <b id="display-name">Usuário</b><br>
+                <small id="display-phone">000000000</small>
+            </div>
+            <div style="text-align: right;">
+                <span id="display-stars">⭐ 0</span>
+                <div id="pro-tag" style="display:none; background: var(--gold); color:black; padding: 2px 6px; border-radius: 5px; font-size: 10px; font-weight: bold;">PRO</div>
             </div>
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="abrirLink('https://docs.google.com/document/d/1hbf3t_GA-CIK0xVl6QOtow-InPC88ERGYNHupCNuNY8/preview', '7 Kalimahs')">
-                <i class="fas fa-book-open"></i><br>7 Kalimahs
+            <div class="menu-item" onclick="abrirDoc('https://docs.google.com/document/d/1hbf3t_GA-CIK0xVl6QOtow-InPC88ERGYNHupCNuNY8/preview', '7 Kalimahs')">
+                <i class="fas fa-scroll"></i><br>7 Kalimahs
             </div>
-            <div class="menu-item" onclick="abrirLink('https://docs.google.com/document/d/1V1LBzbZflRYVAxp6xDK6JuN-MHbIAGa3/preview', 'Duãs Diárias')">
+            <div class="menu-item" onclick="abrirDoc('https://docs.google.com/document/d/1V1LBzbZflRYVAxp6xDK6JuN-MHbIAGa3/preview', 'Duãs Diárias')">
                 <i class="fas fa-hands-praying"></i><br>Duãs Diárias
             </div>
-            <div class="menu-item" onclick="ganharEstrela()">
-                <i class="fas fa-star" style="color:var(--gold)"></i><br>Ganhar Estrela
+            <div class="menu-item" onclick="ganharEstrelas()">
+                <i class="fas fa-star" style="color:var(--gold)"></i><br>Ganhar +10 ⭐
             </div>
             <div class="menu-item" onclick="ativarPro()">
-                <i class="fas fa-crown" style="color:var(--gold)"></i><br>Nível Pro
+                <i class="fas fa-crown" style="color:var(--gold)"></i><br>Ativar PRO
+            </div>
+            <div class="menu-item" onclick="logout()" style="grid-column: span 2; background: #fee;">
+                <i class="fas fa-sign-out-alt" style="color:red"></i><br>Sair da Conta
             </div>
         </div>
     </div>
 
     <div id="webview-container">
         <div class="webview-header">
-            <button onclick="fecharLink()" style="background:none; border:none; color:white; font-size: 20px;"><i class="fas fa-times"></i></button>
-            <span id="wv-titulo">Documento</span>
+            <button onclick="fecharDoc()" style="background:none; border:none; color:white; font-size: 22px;"><i class="fas fa-arrow-left"></i></button>
+            <span id="wv-titulo" style="font-weight:bold;">Documento</span>
         </div>
         <iframe id="wv-frame"></iframe>
     </div>
 
     <script>
-        // Forçar saída do loader ao carregar a página
-        window.onload = () => {
-            document.getElementById('loader').classList.add('hidden');
-        };
+        // Remover Loader ao iniciar
+        window.addEventListener('load', () => {
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+            verificarSessao();
+        });
 
-        let db = { stars: 0, phone: "", isPro: false };
-
-        function entrar() {
-            const p = document.getElementById('login-phone').value;
-            if(p.length < 4) return alert("Insira um número válido");
-            db.phone = p;
-            document.getElementById('user-info').innerText = p;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app-main').style.display = 'block';
+        // Alternar entre Login e Registro
+        function toggleAuth() {
+            document.getElementById('login-screen').classList.toggle('hidden');
+            document.getElementById('register-screen').classList.toggle('hidden');
         }
 
-        function abrirLink(url, titulo) {
+        // Simulação de Banco de Dados Local
+        function registrar() {
+            const nome = document.getElementById('reg-name').value;
+            const fone = document.getElementById('reg-phone').value;
+            const pin = document.getElementById('reg-pin').value;
+
+            if(!nome || !fone || !pin) return alert("Preencha todos os campos!");
+
+            const user = { nome, fone, pin, stars: 0, pro: false };
+            localStorage.setItem('user_' + fone, JSON.stringify(user));
+            alert("Conta criada! Agora faça login.");
+            toggleAuth();
+        }
+
+        function entrar() {
+            const fone = document.getElementById('log-phone').value;
+            const pin = document.getElementById('log-pin').value;
+            
+            const savedUser = localStorage.getItem('user_' + fone);
+            if(savedUser) {
+                const user = JSON.parse(savedUser);
+                if(user.pin === pin) {
+                    iniciarSessao(user);
+                } else {
+                    alert("PIN incorreto!");
+                }
+            } else {
+                alert("Usuário não encontrado!");
+            }
+        }
+
+        function iniciarSessao(user) {
+            localStorage.setItem('current_user', JSON.stringify(user));
+            location.reload(); // Recarrega para aplicar os dados
+        }
+
+        function verificarSessao() {
+            const sessao = localStorage.getItem('current_user');
+            if(sessao) {
+                const user = JSON.parse(sessao);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-main').style.display = 'block';
+                document.getElementById('display-name').innerText = user.nome;
+                document.getElementById('display-phone').innerText = user.fone;
+                document.getElementById('display-stars').innerText = "⭐ " + user.stars;
+                if(user.pro) document.getElementById('pro-tag').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('current_user');
+            location.reload();
+        }
+
+        // Funções do App
+        function abrirDoc(url, titulo) {
             document.getElementById('wv-titulo').innerText = titulo;
             document.getElementById('wv-frame').src = url;
             document.getElementById('webview-container').style.display = 'flex';
         }
 
-        function fecharLink() {
+        function fecharDoc() {
             document.getElementById('webview-container').style.display = 'none';
             document.getElementById('wv-frame').src = "";
         }
 
-        function ganharEstrela() {
-            if(db.stars < 50) {
-                db.stars += 10;
-                document.getElementById('user-stars').innerText = "⭐ " + db.stars;
+        function ganharEstrelas() {
+            let user = JSON.parse(localStorage.getItem('current_user'));
+            if(user.stars < 50) {
+                user.stars += 10;
+                localStorage.setItem('current_user', JSON.stringify(user));
+                localStorage.setItem('user_' + user.fone, JSON.stringify(user));
+                document.getElementById('display-stars').innerText = "⭐ " + user.stars;
                 alert("Você ganhou 10 estrelas!");
             } else {
-                alert("Limite diário de 50 atingido!");
+                alert("Limite de 50 estrelas atingido hoje!");
             }
         }
 
         function ativarPro() {
-            const cod = prompt("Insira o Código Pro (Enviado após pagar 25MTN):");
-            if(!cod) return;
+            let user = JSON.parse(localStorage.getItem('current_user'));
+            const cod = prompt("Digite o código secreto (Pagamento 25MTN):");
             
-            // Lógica de validação (converte os 4 últimos dígitos do tel em letras)
+            // Lógica de código (Ex: Se o final do tel é 1234, o código é BCDE)
             const mapa = ['A','B','C','D','E','F','G','H','I','J'];
             let esperado = "";
-            const ultimos4 = db.phone.slice(-4);
+            const ultimos4 = user.fone.slice(-4);
             for(let n of ultimos4) esperado += mapa[parseInt(n)];
 
-            if(cod.toUpperCase() === esperado) {
-                db.isPro = true;
-                document.getElementById('pro-tag').style.display = 'inline';
-                alert("PARABÉNS! Nível PRO Ativado.");
+            if(cod && cod.toUpperCase() === esperado) {
+                user.pro = true;
+                localStorage.setItem('current_user', JSON.stringify(user));
+                localStorage.setItem('user_' + user.fone, JSON.stringify(user));
+                document.getElementById('pro-tag').style.display = 'block';
+                alert("NÍVEL PRO ATIVADO!");
             } else {
-                alert("Código incorreto!");
+                alert("Código Inválido!");
             }
         }
     </script>
