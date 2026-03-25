@@ -1,289 +1,2002 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🕋 ISLAM MOÇAMBIQUE</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { 
-            --p-green: #1a5f4a; 
-            --d-green: #0d3d2d; 
-            --gold: #d4af37; 
-            --white: #ffffff; 
-            --cream: #f5f5dc;
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--cream); color: #333; overflow-x: hidden; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🕋 ISLAM MOÇAMBIQUE 🕋</title>
+<!-- Fonts e Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-        /* Sistema de Telas */
-        .tela { display: none; min-height: 100vh; width: 100%; }
-        .tela.active { display: flex; flex-direction: column; }
+:root {
+  --primary-green: #1a5f4a;
+  --dark-green: #0d3d2d;
+  --light-green: #2d8a6e;
+  --gold: #d4af37;
+  --light-gold: #f4d03f;
+  --cream: #f5f5dc;
+  --white: #ffffff;
+  --dark: #1a1a1a;
+  --red: #e74c3c;
+  --whatsapp: #25D366;
+}
 
-        /* Design da Tela de Registro/Login */
-        #registro-tela { 
-            background: linear-gradient(135deg, var(--d-green), var(--p-green)); 
-            align-items: center; 
-            justify-content: center; 
-            color: var(--gold); 
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-        }
-        .box-registro { 
-            background: rgba(0,0,0,0.3); 
-            padding: 30px; 
-            border-radius: 20px; 
-            width: 90%; 
-            max-width: 380px; 
-            text-align: center; 
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            backdrop-filter: blur(10px);
-        }
-        .box-registro h1 { font-size: 2rem; margin-bottom: 20px; letter-spacing: 2px; }
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            margin: 10px 0; 
-            border-radius: 10px; 
-            border: none; 
-            font-size: 1rem;
-            outline: none;
-            color: #333;
-        }
-        .btn-entrar { 
-            width: 100%; 
-            padding: 15px; 
-            background: var(--gold); 
-            color: var(--d-green); 
-            border: none; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            font-size: 1.1rem;
-            cursor: pointer; 
-            margin-top: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
+body {
+  font-family: 'Cairo', sans-serif;
+  background-color: var(--cream);
+  color: var(--dark);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
 
-        /* Design do App Principal */
-        header { 
-            background: var(--d-green); 
-            color: white; 
-            padding: 15px 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            position: fixed; 
-            top: 0; 
-            width: 100%; 
-            z-index: 100;
-        }
-        .user-pill { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .stars-pill { color: var(--gold); font-weight: bold; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; }
+/* Loader */
+.loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--dark-green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease;
+}
 
-        .main-container { padding: 90px 20px 20px; max-width: 600px; margin: 0 auto; width: 100%; }
-        .status-card { 
-            background: var(--p-green); 
-            color: white; 
-            padding: 20px; 
-            border-radius: 15px; 
-            text-align: center; 
-            margin-bottom: 20px;
-        }
+.loader.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
 
-        /* Grid de Menu */
-        .menu-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 12px; 
-        }
-        .menu-item { 
-            background: white; 
-            padding: 20px 5px; 
-            border-radius: 15px; 
-            text-align: center; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-            cursor: pointer; 
-            border: 1px solid #f0f0f0;
-        }
-        .menu-item i { font-size: 1.8rem; color: var(--p-green); margin-bottom: 8px; display: block; }
-        .menu-item span { font-size: 0.75rem; font-weight: bold; color: #555; }
-        .menu-item.btn-gold { background: var(--gold); border: none; }
+.loader-moon {
+  font-size: 4rem;
+  color: var(--gold);
+  animation: crescent 2s ease-in-out infinite;
+}
 
-        /* Modais */
-        .modal { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.8); 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 1000; 
-            padding: 20px; 
-        }
-        .modal.active { display: flex; }
-        .modal-box { background: white; padding: 25px; border-radius: 20px; width: 100%; max-width: 350px; position: relative; }
-    </style>
+@keyframes crescent {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(20deg); }
+}
+
+/* Auth Screens */
+.auth-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  padding: 20px;
+}
+
+.auth-screen.hidden {
+  display: none;
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-logo .logo-icon {
+  font-size: 5rem;
+  margin-bottom: 10px;
+}
+
+.auth-logo h1 {
+  font-family: 'Amiri', serif;
+  color: var(--gold);
+  font-size: 2rem;
+}
+
+.auth-form {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.auth-form h2 {
+  color: var(--white);
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: var(--cream);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.btn {
+  padding: 15px 40px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--dark-green);
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background: var(--light-gold);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--white);
+  border: 2px solid var(--gold);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn-secondary:hover {
+  background: var(--gold);
+  color: var(--dark-green);
+}
+
+.btn-whatsapp {
+  background: var(--whatsapp);
+  color: var(--white);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn-whatsapp:hover {
+  background: #128C7E;
+  transform: translateY(-2px);
+}
+
+.auth-toggle {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--cream);
+}
+
+.auth-toggle a {
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Pending Approval Screen */
+.pending-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9500;
+  padding: 20px;
+  text-align: center;
+}
+
+.pending-screen.active {
+  display: flex;
+}
+
+.pending-icon {
+  font-size: 6rem;
+  color: var(--gold);
+  margin-bottom: 30px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.pending-screen h2 {
+  font-family: 'Amiri', serif;
+  color: var(--gold);
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.pending-screen p {
+  color: var(--cream);
+  font-size: 1.1rem;
+  max-width: 400px;
+  margin-bottom: 15px;
+  line-height: 1.8;
+}
+
+.pending-info {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 15px;
+  margin: 20px 0;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.pending-info h3 {
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.pending-info ul {
+  list-style: none;
+  color: var(--cream);
+  text-align: left;
+}
+
+.pending-info li {
+  margin: 8px 0;
+  padding-left: 20px;
+  position: relative;
+}
+
+.pending-info li:before {
+  content: "⏳";
+  position: absolute;
+  left: 0;
+}
+
+/* Main App */
+.app-container {
+  display: none;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.app-container.active {
+  display: block;
+}
+
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+  color: var(--white);
+  padding: 15px 20px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark-green);
+  font-weight: bold;
+}
+
+.user-details h4 {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.user-stars {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--gold);
+}
+
+.pro-badge {
+  background: var(--gold);
+  color: var(--dark-green);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.logout-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--white);
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+/* Prayer Hero */
+.prayer-hero {
+  margin-top: 70px;
+  background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+  color: var(--white);
+  padding: 30px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.prayer-hero::before {
+  content: '☪';
+  position: absolute;
+  font-size: 10rem;
+  opacity: 0.05;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.current-prayer {
+  position: relative;
+  z-index: 1;
+}
+
+.current-prayer h2 {
+  font-family: 'Amiri', serif;
+  font-size: 2rem;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.countdown {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 20px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.next-prayer {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.azan-btn {
+  background: var(--gold);
+  color: var(--dark-green);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  margin-top: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  display: none;
+}
+
+.azan-btn.show {
+  display: inline-block;
+  animation: pulse 1s infinite;
+}
+
+/* Hadith Section */
+.hadith-section {
+  background: var(--white);
+  margin: 20px;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hadith-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: var(--primary-green);
+}
+
+.hadith-header i {
+  font-size: 1.5rem;
+}
+
+.hadith-text {
+  font-style: italic;
+  color: var(--dark);
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+.hadith-source {
+  margin-top: 15px;
+  color: var(--gold);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Menu Grid */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  padding: 20px;
+}
+
+.menu-item {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 25px 15px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.menu-item:hover {
+  transform: translateY(-5px);
+  border-color: var(--gold);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.menu-item i {
+  font-size: 2.5rem;
+  color: var(--primary-green);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.menu-item span {
+  font-size: 0.85rem;
+  color: var(--dark);
+  font-weight: 600;
+}
+
+.menu-item.whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: var(--white);
+}
+
+.menu-item.whatsapp i, .menu-item.whatsapp span {
+  color: var(--white);
+}
+
+.menu-item.locked {
+  opacity: 0.5;
+  position: relative;
+}
+
+.menu-item.locked::after {
+  content: '🔒';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1rem;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.nav-item {
+  text-align: center;
+  color: #999;
+  text-decoration: none;
+  font-size: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.nav-item i {
+  font-size: 1.5rem;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.nav-item.active {
+  color: var(--primary-green);
+}
+
+/* Screens */
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding: 80px 20px 100px;
+  background: var(--cream);
+}
+
+.screen.active {
+  display: block;
+}
+
+.screen-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  color: var(--gold);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.screen-title {
+  font-family: 'Amiri', serif;
+  color: var(--dark-green);
+  font-size: 1.5rem;
+}
+
+/* Tasbih Screen */
+.tasbih-container {
+  background: var(--white);
+  border-radius: 30px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.tasbih-arabic {
+  font-family: 'Noto Naskh Arabic', serif;
+  font-size: 2.5rem;
+  color: var(--primary-green);
+  margin-bottom: 10px;
+}
+
+.tasbih-translation {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.tasbih-counter {
+  font-size: 5rem;
+  font-weight: bold;
+  color: var(--gold);
+  margin: 20px 0;
+  font-family: 'Courier New', monospace;
+}
+
+.tasbih-goal {
+  color: #999;
+  margin-bottom: 30px;
+}
+
+.tasbih-controls {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.tasbih-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tasbih-btn.count {
+  background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+  color: var(--white);
+  font-size: 2rem;
+}
+
+.tasbih-btn.count:active {
+  transform: scale(0.95);
+}
+
+.tasbih-btn.reset {
+  background: #eee;
+  color: #666;
+}
+
+.dhikr-selector {
+  margin-bottom: 30px;
+}
+
+.dhikr-selector select {
+  width: 100%;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid var(--primary-green);
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+  background: var(--white);
+  color: var(--dark);
+}
+
+/* Chat Screen */
+.chat-container {
+  background: var(--white);
+  border-radius: 20px;
+  height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+.chat-message {
+  margin-bottom: 15px;
+  max-width: 80%;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-message.own {
+  margin-left: auto;
+  text-align: right;
+}
+
+.message-bubble {
+  background: var(--white);
+  padding: 12px 18px;
+  border-radius: 20px;
+  display: inline-block;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chat-message.own .message-bubble {
+  background: var(--primary-green);
+  color: var(--white);
+}
+
+.message-sender {
+  font-size: 0.8rem;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.chat-input-area {
+  padding: 15px;
+  background: var(--white);
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 20px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 1rem;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+}
+
+.chat-send {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  color: var(--gold);
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+/* Stars Warning */
+.stars-warning {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  background: var(--red);
+  color: var(--white);
+  padding: 15px;
+  text-align: center;
+  z-index: 999;
+  display: none;
+}
+
+.stars-warning.show {
+  display: block;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* Earn Stars Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-content h3 {
+  color: var(--dark-green);
+  margin-bottom: 20px;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: var(--cream);
+  border-radius: 15px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.task-item:hover {
+  background: var(--light-green);
+  color: var(--white);
+}
+
+.task-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark-green);
+  font-size: 1.5rem;
+}
+
+.task-info {
+  flex: 1;
+  text-align: left;
+}
+
+.task-info h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.task-info p {
+  margin: 5px 0 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.task-reward {
+  color: var(--gold);
+  font-weight: bold;
+}
+
+/* Quiz Screen */
+.quiz-container {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-question {
+  font-size: 1.2rem;
+  color: var(--dark-green);
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.quiz-option {
+  padding: 20px;
+  background: var(--cream);
+  border: 2px solid transparent;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.quiz-option:hover {
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.quiz-option.correct {
+  background: #2ecc71;
+  color: var(--white);
+  border-color: #27ae60;
+}
+
+.quiz-option.wrong {
+  background: var(--red);
+  color: var(--white);
+  border-color: #c0392b;
+}
+
+.quiz-score {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 1.2rem;
+  color: var(--gold);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tasbih-counter {
+    font-size: 4rem;
+  }
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* WebView Container */
+.webview-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--white);
+  z-index: 10000;
+  display: none;
+  flex-direction: column;
+}
+
+.webview-container.show {
+  display: flex;
+}
+
+.webview-header {
+  background: var(--dark-green);
+  color: var(--white);
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.webview-frame {
+  flex: 1;
+  border: none;
+  width: 100%;
+}
+
+/* Ad Container */
+.ad-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--dark-green);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.ad-container.show {
+  display: flex;
+}
+
+.ad-timer {
+  color: var(--gold);
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.ad-text {
+  color: var(--white);
+  text-align: center;
+  padding: 20px;
+}
+
+.ad-close {
+  display: none;
+  margin-top: 20px;
+  padding: 15px 40px;
+  background: var(--gold);
+  color: var(--dark-green);
+  border: none;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.ad-close.show {
+  display: block;
+}
+
+/* Contact Info Section */
+.contact-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: var(--white);
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.contact-whatsapp i {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.contact-whatsapp a {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+</style>
 </head>
 <body>
 
-    <!-- TELA DE REGISTRO/LOGIN -->
-    <div id="registro-tela" class="tela active">
-        <div class="box-registro">
-            <i class="fas fa-mosque fa-3x"></i>
-            <h1 style="margin-top:10px">ISLAM MZ</h1>
-            <p style="margin-bottom:20px; font-size:0.9rem">Crie a sua conta local</p>
-            <input type="text" id="reg-nome" placeholder="Nome Completo">
-            <input type="tel" id="reg-fone" placeholder="Número de Telemóvel">
-            <button class="btn-entrar" onclick="finalizarRegistro()">CRIAR CONTA E ENTRAR</button>
-        </div>
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-moon">☪</div>
+  <p style="color: var(--white); margin-top: 20px;">Carregando Islam Moçambique...</p>
+</div>
+
+<!-- Auth Screens -->
+<div class="auth-screen" id="login-screen">
+  <div class="auth-logo">
+    <div class="logo-icon">🕋</div>
+    <h1>ISLAM MOÇAMBIQUE</h1>
+  </div>
+  <div class="auth-form">
+    <h2>Entrar</h2>
+    <form id="login-form">
+      <div class="form-group">
+        <label>Número de Celular</label>
+        <input type="tel" id="login-phone" placeholder="+25886XXX XXXX" required>
+      </div>
+      <div class="form-group">
+        <label>PIN (6 dígitos)</label>
+        <input type="password" id="login-pin" maxlength="6" placeholder="******" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Entrar</button>
+    </form>
+    <div class="auth-toggle">
+      Não tem conta? <a href="#" onclick="showRegister()">Registar</a>
     </div>
+  </div>
+</div>
 
-    <!-- TELA PRINCIPAL -->
-    <div id="app-tela" class="tela">
-        <header>
-            <div class="user-pill">
-                <i class="fas fa-user-circle"></i>
-                <span id="ui-nome">...</span>
-                <span id="ui-pro-tag" class="tag-pro" style="display:none; background:var(--gold); color:var(--d-green); font-size:10px; padding:2px 5px; border-radius:3px">PRO</span>
-            </div>
-            <div class="stars-pill">
-                <i class="fas fa-star"></i> <span id="ui-stars">100</span>
-            </div>
-            <button onclick="fazerLogout()" style="background:none; border:none; color:white;"><i class="fas fa-power-off"></i></button>
-        </header>
+<div class="auth-screen hidden" id="register-screen">
+  <div class="auth-logo">
+    <div class="logo-icon">🕋</div>
+    <h1>ISLAM MOÇAMBIQUE</h1>
+  </div>
+  <div class="auth-form">
+    <h2>Criar Conta</h2>
+    <form id="register-form">
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="reg-name" placeholder="Seu nome completo" required>
+      </div>
+      <div class="form-group">
+        <label>Número de Celular</label>
+        <input type="tel" id="reg-phone" placeholder="+25886XXX XXXX" required>
+      </div>
+      <div class="form-group">
+        <label>Criar PIN (6 dígitos)</label>
+        <input type="password" id="reg-pin" maxlength="6" placeholder="******" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Criar Conta</button>
+    </form>
+    <button class="btn btn-secondary" onclick="showLogin()">Já tenho conta</button>
+  </div>
+</div>
 
-        <div class="main-container">
-            <div class="status-card">
-                <h2 id="ui-saudacao">Assalamu Alaikum</h2>
-                <p id="ui-status-texto">Nível Básico</p>
-            </div>
+<!-- Pending Approval Screen -->
+<div class="pending-screen" id="pending-screen">
+  <div class="pending-icon">⏳</div>
+  <h2>Aguardando Aprovação</h2>
+  <p>Assalamu Alaikum! Sua conta foi criada com sucesso e está aguardando aprovação do administrador.</p>
+  
+  <div class="pending-info">
+    <h3>O que acontece agora?</h3>
+    <ul>
+      <li>Um administrador irá revisar seu cadastro</li>
+      <li>Você receberá uma notificação quando for aprovado</li>
+      <li>Isso geralmente leva até 24 horas</li>
+    </ul>
+  </div>
+  
+  <p style="font-size: 0.9rem; opacity: 0.8;">Entre em contato caso precise de ajuda urgente:</p>
+  
+  <a href="https://wa.me/258860407269" class="btn btn-whatsapp" style="max-width: 300px; margin-top: 10px;">
+    <i class="fab fa-whatsapp"></i> Contactar Suporte
+  </a>
+  
+  <button class="btn btn-secondary" onclick="logout()" style="max-width: 300px; margin-top: 15px;">
+    <i class="fas fa-sign-out-alt"></i> Sair
+  </button>
+</div>
 
-            <div class="menu-grid">
-                <div class="menu-item" onclick="executarAcao('quran')"><i class="fas fa-quran"></i><span>Alcorão</span></div>
-                <div class="menu-item" onclick="executarAcao('tasbih')"><i class="fas fa-fingerprint"></i><span>Tasbih</span></div>
-                <div class="menu-item" onclick="abrirModal('modal-pro')"><i class="fas fa-crown"></i><span>PRO</span></div>
-                <div class="menu-item btn-gold" onclick="abrirModal('modal-apoio')"><i class="fas fa-heart"></i><span>Apoiar</span></div>
-                <div class="menu-item" onclick="executarAcao('horarios')"><i class="fas fa-clock"></i><span>Horários</span></div>
-                <div class="menu-item" onclick="executarAcao('ajuda')"><i class="fas fa-info-circle"></i><span>Ajuda</span></div>
-            </div>
-        </div>
+<!-- Stars Warning -->
+<div class="stars-warning" id="stars-warning">
+  <i class="fas fa-exclamation-triangle"></i> Estrelas esgotadas! Complete tarefas ou ative o nível Pro.
+  <button onclick="showEarnStars()" style="margin-left: 10px; padding: 5px 15px; background: var(--white); color: var(--red); border: none; border-radius: 15px; cursor: pointer;">Ganhar Estrelas</button>
+</div>
+
+<!-- Earn Stars Modal -->
+<div class="modal-overlay" id="earn-stars-modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-star" style="color: var(--gold);"></i> Ganhar Estrelas</h3>
+    <div class="task-item" onclick="shareWebsite()">
+      <div class="task-icon"><i class="fas fa-share-alt"></i></div>
+      <div class="task-info">
+        <h4>Partilhar Website</h4>
+        <p>Partilhe com 5 pessoas</p>
+      </div>
+      <div class="task-reward">+5⭐</div>
     </div>
-
-    <!-- MODAL APOIO -->
-    <div id="modal-apoio" class="modal">
-        <div class="modal-box">
-            <h4>Apoiar</h4>
-            <p style="font-size:13px; margin:15px 0;">M-Pesa: 1228803 (BEBANE)<br>BIM: 000100000012473356257</p>
-            <button class="btn-entrar" onclick="fecharModal('modal-apoio')">VOLTAR</button>
-        </div>
+    <div class="task-item" onclick="watchAd()">
+      <div class="task-icon"><i class="fas fa-play"></i></div>
+      <div class="task-info">
+        <h4>Ver Anúncio</h4>
+        <p>Assista por 10 segundos</p>
+      </div>
+      <div class="task-reward">+10⭐</div>
     </div>
-
-    <!-- MODAL PRO -->
-    <div id="modal-pro" class="modal">
-        <div class="modal-box">
-            <h4>Ativar PRO</h4>
-            <p style="font-size:11px; text-align:center">Converta os últimos 4 dígitos: 0=A, 1=B, 2=C...</p>
-            <input type="text" id="input-codigo-pro" style="border:1px solid #ddd; text-align:center; letter-spacing:5px" maxlength="4">
-            <button class="btn-entrar" onclick="validarCodigoPro()">ATIVAR</button>
-            <button onclick="fecharModal('modal-pro')" style="width:100%; border:none; background:none; margin-top:10px; color:#999">Cancelar</button>
-        </div>
+    <div class="task-item" onclick="activatePro()">
+      <div class="task-icon" style="background: linear-gradient(135deg, var(--gold), var(--light-gold));"><i class="fas fa-crown"></i></div>
+      <div class="task-info">
+        <h4>Ativar Nível Pro</h4>
+        <p>25MTN/mês - Estrelas ilimitadas</p>
+      </div>
+      <div class="task-reward" style="color: var(--primary-green);">PRO</div>
     </div>
+    <button class="btn btn-secondary" onclick="closeEarnStars()" style="margin-top: 20px;">Fechar</button>
+  </div>
+</div>
 
-    <script>
-        let usuario = { nome: "", fone: "", estrelas: 100, isPro: false };
-        const dicionarioPro = {'0':'A','1':'B','2':'C','3':'D','4':'E','5':'F','6':'G','7':'H','8':'I','9':'J'};
+<!-- Ad Container -->
+<div class="ad-container" id="ad-container">
+  <div class="ad-timer" id="ad-timer">10</div>
+  <div class="ad-text">
+    <i class="fas fa-ad" style="font-size: 3rem; color: var(--gold); margin-bottom: 20px;"></i>
+    <p>Assista ao anúncio para ganhar 10 estrelas</p>
+  </div>
+  <button class="ad-close" id="ad-close-btn" onclick="closeAd()">Fechar e Ganhar Estrelas</button>
+</div>
 
-        // FUNÇÃO DE INICIALIZAÇÃO (O "Coração" do Login)
-        window.onload = function() {
-            const dadosSalvos = localStorage.getItem('islam_mz_v5');
-            if (dadosSalvos) {
-                usuario = JSON.parse(dadosSalvos);
-                if (usuario.nome && usuario.fone) {
-                    atualizarInterface();
-                    trocarTela('app-tela');
-                }
-            }
-        };
+<!-- WebView Container -->
+<div class="webview-container" id="webview-container">
+  <div class="webview-header">
+    <button class="back-btn" onclick="closeWebview()"><i class="fas fa-arrow-left"></i></button>
+    <span id="webview-title">Alcorão</span>
+  </div>
+  <iframe class="webview-frame" id="webview-frame" src=""></iframe>
+</div>
 
-        function finalizarRegistro() {
-            const n = document.getElementById('reg-nome').value.trim();
-            const f = document.getElementById('reg-fone').value.trim();
+<!-- Main App -->
+<div class="app-container" id="app-container">
+  <!-- Header -->
+  <div class="app-header">
+    <div class="user-info">
+      <div class="user-avatar" id="user-avatar">U</div>
+      <div class="user-details">
+        <h4 id="user-name">Usuário</h4>
+        <div class="user-stars">
+          <i class="fas fa-star"></i>
+          <span id="stars-count">100</span>
+          <span class="pro-badge hidden" id="pro-badge">PRO</span>
+        </div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
 
-            if (n.length < 2 || f.length < 5) {
-                alert("Por favor, preencha o nome e o número corretamente.");
-                return;
-            }
+  <!-- Prayer Hero -->
+  <div class="prayer-hero">
+    <div class="current-prayer">
+      <h2 id="current-prayer-name">Carregando...</h2>
+      <div class="countdown" id="countdown">00:00:00</div>
+      <div class="next-prayer">Próximo: <span id="next-prayer-name">--:--</span></div>
+      <button class="azan-btn" id="azan-btn" onclick="playAzan()"><i class="fas fa-volume-up"></i> Tocar Azan</button>
+    </div>
+  </div>
 
-            usuario.nome = n;
-            usuario.fone = f;
-            usuario.estrelas = 100;
-            usuario.isPro = false;
+  <!-- Hadith Section -->
+  <div class="hadith-section">
+    <div class="hadith-header">
+      <i class="fas fa-book-open"></i>
+      <h3>Hadith do Dia</h3>
+    </div>
+    <div class="hadith-text" id="hadith-text">
+      "As ações são julgadas pelas intenções, e cada pessoa terá o que pretendeu..."
+    </div>
+    <div class="hadith-source" id="hadith-source">— Sahih al-Bukhari, 1</div>
+  </div>
 
-            salvarDados();
-            atualizarInterface();
-            trocarTela('app-tela');
+  <!-- Menu Grid -->
+  <div class="menu-grid">
+    <!-- LINK DO GOOGLE DRIVE ATUALIZADO AQUI -->
+    <div class="menu-item" onclick="openWebview('https://drive.google.com/drive/folders/1b61ZOyB07h0AhOoKYtvjyfZqtrXbRQO0', 'Alcorão Áudio')">
+      <i class="fas fa-headphones"></i>
+      <span>Alcorão Áudio</span>
+    </div>
+    
+    <div class="menu-item" onclick="openWebview('https://www.quranwow.com/#/ch/1/t1/ar-allah/t2/pt-elhayek/a1/alafasy-64/a2/minshawy-64/v/1', 'Ler Alcorão')">
+      <i class="fas fa-book-open"></i>
+      <span>Ler Alcorão</span>
+    </div>
+    <div class="menu-item" onclick="showScreen('tasbih-screen')">
+      <i class="fas fa-pray"></i>
+      <span>Tasbih Digital</span>
+    </div>
+    <div class="menu-item" onclick="showScreen('chat-screen')">
+      <i class="fas fa-comments"></i>
+      <span>Chat Room</span>
+    </div>
+    <div class="menu-item" onclick="openLink('https://docs.google.com/document/d/1hbf3t_GA-CIK0xVl6QOtow-InPC88ERGYNHupCNuNY8/edit?usp=drivesdk')">
+      <i class="fas fa-hand-holding-heart"></i>
+      <span>7 Kalimahs</span>
+    </div>
+    <div class="menu-item" onclick="openLink('https://docs.google.com/document/d/1V1LBzbZflRYVAxp6xDK6JuN-MHbIAGa3/edit?usp=drivesdk&ouid=104825010649175353764&rtpof=true&sd=true')">
+      <i class="fas fa-hands"></i>
+      <span>Duãs Diárias</span>
+    </div>
+    <div class="menu-item" onclick="showScreen('quiz-screen')">
+      <i class="fas fa-question-circle"></i>
+      <span>Quiz Islâmico</span>
+    </div>
+    <div class="menu-item whatsapp" onclick="openLink('https://chat.whatsapp.com/HVjrMg5MuWc3oicaKMZGZw?mode=gi_t')">
+      <i class="fab fa-whatsapp"></i>
+      <span>Madrassa Online</span>
+    </div>
+    <div class="menu-item" onclick="showEarnStars()">
+      <i class="fas fa-star" style="color: var(--gold);"></i>
+      <span>Ganhar Estrelas</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tasbih Screen -->
+<div class="screen" id="tasbih-screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main')"><i class="fas fa-arrow-left"></i></button>
+    <h2 class="screen-title">Tasbih Digital</h2>
+  </div>
+  <div class="tasbih-container">
+    <div class="dhikr-selector">
+      <select id="dhikr-select" onchange="changeDhikr()">
+        <option value="subhanallah">سُبْحَانَ الله - SubhanAllah</option>
+        <option value="alhamdulillah">ٱلْحَمْدُ لِلَّٰه - Alhamdulillah</option>
+        <option value="la-ilaha">لَا إِلٰهَ إِلَّا الله - La ilaha illa Allah</option>
+        <option value="allahu-akbar">ٱللَّٰهُ أَكْبَرُ - Allahu Akbar</option>
+        <option value="la-hawla">لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِالله - La hawla wa la quwwata illa billah</option>
+      </select>
+    </div>
+    <div class="tasbih-arabic" id="tasbih-arabic">سُبْحَانَ الله</div>
+    <div class="tasbih-translation" id="tasbih-translation">SubhanAllah (Glorificado seja Allah)</div>
+    <div class="tasbih-counter" id="tasbih-count">0</div>
+    <div class="tasbih-goal">Meta: <span id="tasbih-goal">100</span></div>
+    <div class="tasbih-controls">
+      <button class="tasbih-btn reset" onclick="resetTasbih()"><i class="fas fa-redo"></i></button>
+      <button class="tasbih-btn count" onclick="countTasbih()"><i class="fas fa-plus"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Chat Screen -->
+<div class="screen" id="chat-screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main')"><i class="fas fa-arrow-left"></i></button>
+    <h2 class="screen-title">Chat Room</h2>
+  </div>
+  <div class="chat-container">
+    <div class="chat-messages" id="chat-messages">
+      <!-- Messages will be loaded here -->
+    </div>
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Escreva uma mensagem..." maxlength="200">
+      <button class="chat-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Quiz Screen -->
+<div class="screen" id="quiz-screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main')"><i class="fas fa-arrow-left"></i></button>
+    <h2 class="screen-title">Quiz Islâmico</h2>
+  </div>
+  <div class="quiz-container" id="quiz-container">
+    <div class="quiz-question" id="quiz-question">Carregando pergunta...</div>
+    <div class="quiz-options" id="quiz-options">
+      <!-- Options will be loaded here -->
+    </div>
+    <div class="quiz-score" id="quiz-score">Pontuação: 0</div>
+  </div>
+</div>
+
+<!-- Contact Screen -->
+<div class="screen" id="contact-screen">
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main')"><i class="fas fa-arrow-left"></i></button>
+    <h2 class="screen-title">Contacto</h2>
+  </div>
+  <div class="contact-whatsapp">
+    <i class="fab fa-whatsapp"></i>
+    <p>WhatsApp</p>
+    <a href="https://wa.me/258860407269">+258 860407269</a>
+  </div>
+  <div class="contact-info" style="background: var(--white); padding: 30px; border-radius: 20px;">
+    <div class="contact-item" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+      <i class="fas fa-phone" style="width: 50px; height: 50px; background: var(--primary-green); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center;"></i>
+      <div>
+        <h4 style="color: var(--dark-green);">Telefone</h4>
+        <p>+258 860407269</p>
+      </div>
+    </div>
+    <div class="contact-item" style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+      <i class="fas fa-envelope" style="width: 50px; height: 50px; background: var(--primary-green); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center;"></i>
+      <div>
+        <h4 style="color: var(--dark-green);">Email</h4>
+        <p>islammocambique@gmail.com</p>
+      </div>
+    </div>
+    <div class="contact-item" style="display: flex; align-items: center; gap: 15px;">
+      <i class="fas fa-map-marker-alt" style="width: 50px; height: 50px; background: var(--primary-green); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center;"></i>
+      <div>
+        <h4 style="color: var(--dark-green);">Endereço</h4>
+        <p>Maputo, Moçambique</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav" id="bottom-nav" style="display: none;">
+  <a href="#" class="nav-item active" onclick="showScreen('main')">
+    <i class="fas fa-home"></i>
+    Início
+  </a>
+  <a href="#" class="nav-item" onclick="showScreen('tasbih-screen')">
+    <i class="fas fa-pray"></i>
+    Tasbih
+  </a>
+  <a href="#" class="nav-item" onclick="showScreen('chat-screen')">
+    <i class="fas fa-comments"></i>
+    Chat
+  </a>
+  <a href="#" class="nav-item" onclick="showScreen('contact-screen')">
+    <i class="fas fa-phone"></i>
+    Contacto
+  </a>
+</div>
+
+<!-- JavaScript -->
+<script>
+// ============================================
+// FIREBASE CONFIGURAÇÃO
+// ============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyD2rNS7HSJyek3OCrRquudFgqQSWXZJYrY",
+  authDomain: "madrassa-online-b851c.firebaseapp.com",
+  databaseURL: "https://madrassa-online-b851c-default-rtdb.firebaseio.com",
+  projectId: "madrassa-online-b851c",
+  storageBucket: "madrassa-online-b851c.firebasestorage.app",
+  messagingSenderId: "360782668012",
+  appId: "1:360782668012:web:d501ef187911db632445c9",
+  measurementId: "G-RV9GD4S22T"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ============================================
+// VARIÁVEIS GLOBAIS
+// ============================================
+let currentUser = null;
+let userData = null;
+let tasbihCount = 0;
+let quizScore = 0;
+let currentQuizQuestion = 0;
+let countdownInterval = null;
+let azanAudio = null;
+
+// ============================================
+// AUTH FUNCTIONS
+// ============================================
+function showLogin() {
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('register-screen').classList.add('hidden');
+}
+
+function showRegister() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('register-screen').classList.remove('hidden');
+}
+
+// Login com verificação de aprovação
+document.getElementById('login-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const phone = document.getElementById('login-phone').value;
+  const pin = document.getElementById('login-pin').value;
+  
+  db.ref('users').orderByChild('phone').equalTo(phone).once('value').then(snapshot => {
+    if (snapshot.exists()) {
+      const userDataSnap = snapshot.val();
+      const userId = Object.keys(userDataSnap)[0];
+      const user = userDataSnap[userId];
+      
+      if (user.pin === pin) {
+        // Verificar se usuário está aprovado
+        if (user.approved === false) {
+          // Usuário não aprovado - mostrar tela de espera
+          currentUser = { uid: userId, ...user };
+          showPendingScreen();
+        } else {
+          // Usuário aprovado - entrar no app
+          currentUser = { uid: userId, ...user };
+          loadUserData(userId);
+          showApp();
         }
+      } else {
+        alert('PIN incorreto!');
+      }
+    } else {
+      alert('Usuário não encontrado!');
+    }
+  });
+});
 
-        function executarAcao(tipo) {
-            if (!usuario.isPro) {
-                if (usuario.estrelas < 7) {
-                    alert("Estrelas insuficientes! Custo: 7 estrelas.");
-                    return;
-                }
-                usuario.estrelas -= 7;
-                salvarDados();
-                atualizarInterface();
-            }
+// Register com campo approved: false
+document.getElementById('register-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const name = document.getElementById('reg-name').value;
+  const phone = document.getElementById('reg-phone').value;
+  const pin = document.getElementById('reg-pin').value;
+  
+  // Check if phone already exists
+  db.ref('users').orderByChild('phone').equalTo(phone).once('value').then(snapshot => {
+    if (snapshot.exists()) {
+      alert('Este número já está registado!');
+      return;
+    }
+    
+    const newUserRef = db.ref('users').push();
+    const userData = {
+      name: name,
+      phone: phone,
+      pin: pin,
+      stars: 100,
+      nivelPro: false,
+      proExpiry: null,
+      approved: false, // NOVO: Usuário começa não aprovado
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    
+    newUserRef.set(userData)
+      .then(() => {
+        alert('Conta criada com sucesso! Aguarde aprovação do administrador.');
+        showPendingScreen(); // Mostrar tela de aguardo ao invés de login
+      });
+  });
+});
 
-            if (tipo === 'quran') window.open('https://quran.com/pt', '_blank');
-            else alert("Funcionalidade em breve!");
-        }
+function showPendingScreen() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('register-screen').classList.add('hidden');
+  document.getElementById('pending-screen').classList.add('active');
+  document.getElementById('loader').classList.add('hidden');
+}
 
-        function validarCodigoPro() {
-            const inputVal = document.getElementById('input-codigo-pro').value.toUpperCase().trim();
-            const ultimosQuatro = usuario.fone.slice(-4);
-            let codigoEsperado = "";
-            for (let d of ultimosQuatro) codigoEsperado += dicionarioPro[d] || "";
+function loadUserData(userId) {
+  db.ref('users/' + userId).on('value', snapshot => {
+    userData = snapshot.val();
+    updateUserUI();
+    checkStars();
+  });
+}
 
-            if (inputVal === codigoEsperado && codigoEsperado !== "") {
-                usuario.isPro = true;
-                usuario.estrelas = 99999;
-                salvarDados();
-                atualizarInterface();
-                fecharModal('modal-pro');
-                alert("Nível PRO Ativado!");
-            } else {
-                alert("Código errado!");
-            }
-        }
+function updateUserUI() {
+  if (!userData) return;
+  document.getElementById('user-name').textContent = userData.name;
+  document.getElementById('user-avatar').textContent = userData.name.charAt(0).toUpperCase();
+  document.getElementById('stars-count').textContent = userData.stars;
+  
+  const proBadge = document.getElementById('pro-badge');
+  if (userData.nivelPro) {
+    proBadge.classList.remove('hidden');
+  } else {
+    proBadge.classList.add('hidden');
+  }
+}
 
-        function salvarDados() { localStorage.setItem('islam_mz_v5', JSON.stringify(usuario)); }
+function checkStars() {
+  if (!userData) return;
+  const warning = document.getElementById('stars-warning');
+  if (userData.stars <= 0 && !userData.nivelPro) {
+    warning.classList.add('show');
+    document.querySelectorAll('.menu-item').forEach(item => {
+      if (!item.onclick.toString().includes('showEarnStars') &&
+          !item.onclick.toString().includes('activatePro')) {
+        item.classList.add('locked');
+      }
+    });
+  } else {
+    warning.classList.remove('show');
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.classList.remove('locked');
+    });
+  }
+}
 
-        function atualizarInterface() {
-            document.getElementById('ui-nome').innerText = usuario.nome.split(' ')[0];
-            document.getElementById('ui-stars').innerText = Math.floor(usuario.estrelas);
-            if (usuario.isPro) {
-                document.getElementById('ui-pro-tag').style.display = "inline-block";
-                document.getElementById('ui-status-texto').innerText = "Acesso PRO Ilimitado";
-            }
-        }
+function logout() {
+  currentUser = null;
+  userData = null;
+  location.reload();
+}
 
-        function trocarTela(id) {
-            document.querySelectorAll('.tela').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
+// ============================================
+// APP NAVIGATION
+// ============================================
+function showApp() {
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('register-screen').classList.add('hidden');
+  document.getElementById('pending-screen').classList.remove('active');
+  document.getElementById('app-container').classList.add('active');
+  document.getElementById('bottom-nav').style.display = 'flex';
+  document.getElementById('loader').classList.add('hidden');
+  
+  initPrayerTimes();
+  loadHadith();
+  initChat();
+  loadQuiz();
+}
 
-        function abrirModal(id) { document.getElementById(id).classList.add('active'); }
-        function fecharModal(id) { document.getElementById(id).classList.remove('active'); }
+function showScreen(screenId) {
+  if (screenId !== 'main' && userData && userData.stars <= 0 && !userData.nivelPro) {
+    showEarnStars();
+    return;
+  }
+  
+  if (screenId !== 'main' && userData && !userData.nivelPro) {
+    deductStar(1);
+  }
+  
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('app-container').classList.remove('active');
+  
+  if (screenId === 'main') {
+    document.getElementById('app-container').classList.add('active');
+  } else {
+    document.getElementById(screenId).classList.add('active');
+  }
+  
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+}
 
-        function fazerLogout() {
-            if (confirm("Sair apaga os dados locais. Continuar?")) {
-                localStorage.removeItem('islam_mz_v5');
-                location.reload();
-            }
-        }
-    </script>
+// ============================================
+// PRAYER TIMES
+// ============================================
+function initPrayerTimes() {
+  db.ref('horarios de oracao').on('value', snapshot => {
+    const times = snapshot.val() || {
+      Fajr: '04:30',
+      Duhr: '12:15',
+      Asr: '15:30',
+      Magrib: '18:00',
+      Isha: '19:30'
+    };
+    updatePrayerCountdown(times);
+  });
+}
+
+function updatePrayerCountdown(times) {
+  const prayers = [
+    { name: 'Fajr', time: times.Fajr },
+    { name: 'Duhr', time: times.Duhr },
+    { name: 'Asr', time: times.Asr },
+    { name: 'Magrib', time: times.Magrib },
+    { name: 'Isha', time: times.Isha }
+  ];
+
+  function update() {
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    let currentPrayer = null;
+    let nextPrayer = null;
+    let minDiff = Infinity;
+
+    for (let i = 0; i < prayers.length; i++) {
+      const [h, m] = prayers[i].time.split(':').map(Number);
+      const prayerTime = h * 60 + m;
+      const diff = prayerTime - currentTime;
+      
+      if (diff > 0 && diff < minDiff) {
+        minDiff = diff;
+        nextPrayer = prayers[i];
+      }
+      if (diff <= 0 && diff > -60) {
+        currentPrayer = prayers[i];
+      }
+    }
+
+    if (!nextPrayer) {
+      const [h, m] = prayers[0].time.split(':').map(Number);
+      const tomorrowPrayer = h * 60 + m + 24 * 60;
+      minDiff = tomorrowPrayer - currentTime;
+      nextPrayer = prayers[0];
+    }
+
+    if (currentPrayer) {
+      document.getElementById('current-prayer-name').textContent = 'Hora do ' + currentPrayer.name;
+      document.getElementById('azan-btn').classList.add('show');
+    } else {
+      document.getElementById('current-prayer-name').textContent = 'Próximo Salat';
+      document.getElementById('azan-btn').classList.remove('show');
+    }
+
+    document.getElementById('next-prayer-name').textContent = nextPrayer.name + ' às ' + nextPrayer.time;
+
+    const hours = Math.floor(minDiff / 60);
+    const minutes = minDiff % 60;
+    const seconds = 60 - now.getSeconds();
+    document.getElementById('countdown').textContent = 
+      `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+    if (minDiff === 15 && !userData?.lastNotified) {
+      showNotification('⏰ ' + nextPrayer.name + ' em 15 minutos!');
+    }
+  }
+
+  if (countdownInterval) clearInterval(countdownInterval);
+  countdownInterval = setInterval(update, 1000);
+  update();
+}
+
+function playAzan() {
+  if (!azanAudio) {
+    azanAudio = new Audio('https://www.dropbox.com/scl/fi/khfvlutda92d8nec8xcrc/azan1.mp3?rlkey=vqzb4c8dz4mloqbxb99zwe3lr&st=48gmfhmg&raw=1');
+  }
+  azanAudio.play();
+}
+
+function showNotification(message) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('Islam Moçambique', { body: message });
+  } else {
+    alert(message);
+  }
+}
+
+if ('Notification' in window) {
+  Notification.requestPermission();
+}
+
+// ============================================
+// HADITH
+// ============================================
+function loadHadith() {
+  const today = new Date().toDateString();
+  db.ref('hadith do dia').once('value', snapshot => {
+    const hadiths = snapshot.val();
+    if (hadiths) {
+      const keys = Object.keys(hadiths);
+      const index = new Date().getDate() % keys.length;
+      const hadith = hadiths[keys[index]];
+      document.getElementById('hadith-text').textContent = '"' + hadith.Hadith + '"';
+      document.getElementById('hadith-source').textContent = '— ' + hadith.portugues;
+    }
+  });
+}
+
+// ============================================
+// TASBIH
+// ============================================
+const dhikrData = {
+  'subhanallah': { arabic: 'سُبْحَانَ الله', translation: 'SubhanAllah (Glorificado seja Allah)' },
+  'alhamdulillah': { arabic: 'ٱلْحَمْدُ لِلَّٰه', translation: 'Alhamdulillah (Louvado seja Allah)' },
+  'la-ilaha': { arabic: 'لَا إِلٰهَ إِلَّا الله', translation: 'La ilaha illa Allah (Não há divindade além de Allah)' },
+  'allahu-akbar': { arabic: 'ٱللَّٰهُ أَكْبَرُ', translation: 'Allahu Akbar (Allah é o Maior)' },
+  'la-hawla': { arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِالله', translation: 'La hawla wa la quwwata illa billah' }
+};
+
+function changeDhikr() {
+  const select = document.getElementById('dhikr-select');
+  const dhikr = dhikrData[select.value];
+  document.getElementById('tasbih-arabic').textContent = dhikr.arabic;
+  document.getElementById('tasbih-translation').textContent = dhikr.translation;
+  resetTasbih();
+}
+
+function countTasbih() {
+  tasbihCount++;
+  document.getElementById('tasbih-count').textContent = tasbihCount;
+  if (navigator.vibrate) {
+    navigator.vibrate(50);
+  }
+  if (tasbihCount === 100) {
+    alert('MashaAllah! Completou 100 dhikr! 🎉');
+    if (!userData?.nivelPro) {
+      addStars(5);
+    }
+  }
+}
+
+function resetTasbih() {
+  tasbihCount = 0;
+  document.getElementById('tasbih-count').textContent = '0';
+}
+
+// ============================================
+// CHAT
+// ============================================
+function initChat() {
+  const messagesDiv = document.getElementById('chat-messages');
+  db.ref('chat').limitToLast(50).on('child_added', snapshot => {
+    const msg = snapshot.val();
+    displayMessage(msg);
+  });
+}
+
+function displayMessage(msg) {
+  const messagesDiv = document.getElementById('chat-messages');
+  const isOwn = msg.uid === currentUser?.uid;
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-message ' + (isOwn ? 'own' : '');
+  msgDiv.innerHTML = `
+    <div class="message-sender">${msg.name}</div>
+    <div class="message-bubble">${msg.text}</div>
+  `;
+  messagesDiv.appendChild(msgDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || !currentUser) return;
+  
+  if (userData.stars <= 0 && !userData.nivelPro) {
+    showEarnStars();
+    return;
+  }
+  
+  db.ref('chat').push({
+    uid: currentUser.uid,
+    name: userData.name,
+    text: text,
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  });
+  input.value = '';
+  
+  if (!userData.nivelPro) {
+    deductStar(1);
+  }
+}
+
+document.getElementById('chat-input')?.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') sendChatMessage();
+});
+
+// ============================================
+// QUIZ
+// ============================================
+const quizQuestions = [
+  {
+    question: 'Quantos pilares tem o Islam?',
+    options: ['3', '4', '5', '6'],
+    correct: 2
+  },
+  {
+    question: 'Quem é o último profeta enviado por Allah?',
+    options: ['Moisés', 'Jesus', 'Muhammad (S.A.W)', 'Abraão'],
+    correct: 2
+  },
+  {
+    question: 'Qual é o primeiro mês do calendário islâmico?',
+    options: ['Ramadã', 'Muharram', 'Shawwal', 'Dhul-Hijjah'],
+    correct: 1
+  },
+  {
+    question: 'Quantas vezes por dia um muçulmano reza?',
+    options: ['3', '4', '5', '6'],
+    correct: 2
+  },
+  {
+    question: 'Para onde os muçulmanos se viram para orar?',
+    options: ['Meca', 'Médina', 'Jerusalém', 'Cairo'],
+    correct: 0
+  }
+];
+
+function loadQuiz() {
+  showQuizQuestion();
+}
+
+function showQuizQuestion() {
+  const q = quizQuestions[currentQuizQuestion];
+  document.getElementById('quiz-question').textContent = (currentQuizQuestion + 1) + '. ' + q.question;
+  
+  const optionsDiv = document.getElementById('quiz-options');
+  optionsDiv.innerHTML = '';
+  
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt;
+    btn.onclick = () => answerQuiz(idx);
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function answerQuiz(selected) {
+  const q = quizQuestions[currentQuizQuestion];
+  const options = document.querySelectorAll('.quiz-option');
+  
+  options[q.correct].classList.add('correct');
+  
+  if (selected === q.correct) {
+    quizScore += 10;
+    if (!userData?.nivelPro) {
+      addStars(5);
+    }
+    setTimeout(() => {
+      alert('Correto! +5 estrelas! 🎉');
+    }, 500);
+  } else {
+    options[selected].classList.add('wrong');
+    setTimeout(() => {
+      alert('Resposta incorreta. A correta era: ' + q.options[q.correct]);
+    }, 500);
+  }
+  
+  document.getElementById('quiz-score').textContent = 'Pontuação: ' + quizScore;
+  
+  setTimeout(() => {
+    currentQuizQuestion = (currentQuizQuestion + 1) % quizQuestions.length;
+    showQuizQuestion();
+  }, 1500);
+}
+
+// ============================================
+// STARS SYSTEM
+// ============================================
+function addStars(amount) {
+  if (!currentUser) return;
+  const newStars = Math.min(100, (userData.stars || 0) + amount);
+  db.ref('users/' + currentUser.uid + '/stars').set(newStars);
+}
+
+function deductStar(amount) {
+  if (!currentUser || userData.nivelPro) return;
+  const newStars = Math.max(0, (userData.stars || 0) - amount);
+  db.ref('users/' + currentUser.uid + '/stars').set(newStars);
+}
+
+function showEarnStars() {
+  document.getElementById('earn-stars-modal').classList.add('show');
+}
+
+function closeEarnStars() {
+  document.getElementById('earn-stars-modal').classList.remove('show');
+}
+
+function shareWebsite() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'Islam Moçambique',
+      text: 'Venha conhecer o Islam Moçambique App!',
+      url: window.location.href
+    }).then(() => {
+      addStars(5);
+      alert('Obrigado por partilhar! +5 estrelas! ⭐');
+      closeEarnStars();
+    });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    addStars(5);
+    alert('Link copiado! Partilhe com 5 amigos. +5 estrelas! ⭐');
+    closeEarnStars();
+  }
+}
+
+function watchAd() {
+  closeEarnStars();
+  const adContainer = document.getElementById('ad-container');
+  const adTimer = document.getElementById('ad-timer');
+  const adCloseBtn = document.getElementById('ad-close-btn');
+  
+  adContainer.classList.add('show');
+  let seconds = 10;
+  
+  const timer = setInterval(() => {
+    seconds--;
+    adTimer.textContent = seconds;
+    if (seconds <= 0) {
+      clearInterval(timer);
+      adCloseBtn.classList.add('show');
+    }
+  }, 1000);
+}
+
+function closeAd() {
+  document.getElementById('ad-container').classList.remove('show');
+  document.getElementById('ad-close-btn').classList.remove('show');
+  addStars(10);
+  alert('Obrigado! +10 estrelas! ⭐');
+}
+
+function activatePro() {
+  const confirm = window.confirm('Ativar Nível Pro por 25MTN/mês?\n\nBenefícios:\n- Estrelas ilimitadas\n- Acesso total ao app\n- Sem anúncios');
+  if (confirm) {
+    db.ref('users/' + currentUser.uid).update({
+      nivelPro: true,
+      proExpiry: Date.now() + (30 * 24 * 60 * 60 * 1000),
+      stars: 100
+    });
+    alert('Nível Pro ativado! Barakallahu fik! 🎉');
+    closeEarnStars();
+  }
+}
+
+// ============================================
+// WEBVIEW
+// ============================================
+function openWebview(url, title) {
+  if (userData && userData.stars <= 0 && !userData.nivelPro) {
+    showEarnStars();
+    return;
+  }
+  
+  document.getElementById('webview-title').textContent = title;
+  document.getElementById('webview-frame').src = url;
+  document.getElementById('webview-container').classList.add('show');
+  
+  if (!userData?.nivelPro) {
+    deductStar(1);
+  }
+}
+
+function closeWebview() {
+  document.getElementById('webview-container').classList.remove('show');
+  document.getElementById('webview-frame').src = '';
+}
+
+function openLink(url) {
+  window.open(url, '_blank');
+}
+
+// ============================================
+// INIT
+// ============================================
+window.addEventListener('load', function() {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+  }, 1500);
+});
+</script>
+
 </body>
 </html>
