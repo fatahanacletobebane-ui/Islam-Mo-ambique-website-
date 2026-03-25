@@ -1,68 +1,2056 @@
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-<div id="custom-webview" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; background:white; flex-direction:column;">
-    <div style="background:#1a5f4a; color:white; padding:15px; display:flex; align-items:center;">
-        <button onclick="fecharNavegador()" style="background:orange; border:none; padding:10px; border-radius:5px; margin-right:15px;">VOLTAR</button>
-        <span id="wv-titulo">Documento</span>
-    </div>
-    <iframe id="frame-docs" style="flex:1; border:none; width:100%;"></iframe>
-</div>
-
-<script>
-// --- LÓGICA DAS ESTRELAS (LIMITE DE 50) ---
-function adicionarEstrelas(quantidade) {
-    // Busca o valor atual no seu nó do Firebase
-    database.ref('usuarios/' + userLogado.fone + '/stars').once('value').then((snapshot) => {
-        let estrelasAtuais = snapshot.val() || 0;
-        
-        if (estrelasAtuais + quantidade <= 50) {
-            database.ref('usuarios/' + userLogado.fone).update({
-                stars: estrelasAtuais + quantidade
-            });
-            alert("Você ganhou " + quantidade + " estrelas!");
-        } else {
-            alert("Limite máximo de 50 estrelas atingido!");
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🕋 ISLAM MOÇAMBIQUE 🕋</title>
+    
+    <!-- Fonts e Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    });
-}
 
-// --- LÓGICA DO NÍVEL PRO (CÓDIGO SECRETO) ---
-function ativarNivelPro() {
-    const codigoDigitado = prompt("Digite o código de ativação (25 MTN):");
-    if(!codigoDigitado) return;
+        :root {
+            --primary-green: #1a5f4a;
+            --dark-green: #0d3d2d;
+            --light-green: #2d8a6e;
+            --gold: #d4af37;
+            --light-gold: #f4d03f;
+            --cream: #f5f5dc;
+            --white: #ffffff;
+            --dark: #1a1a1a;
+            --red: #e74c3c;
+            --whatsapp: #25D366;
+        }
 
-    // Converte os últimos 4 dígitos do telefone do seu nó em letras
-    const mapaLetras = ['A','B','C','D','E','F','G','H','I','J'];
-    let codigoEsperado = "";
-    const foneString = userLogado.fone.toString();
-    const ultimos4 = foneString.slice(-4);
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--cream);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    for(let num of ultimos4) {
-        codigoEsperado += mapaLetras[parseInt(num)];
-    }
+        /* Loader */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-green);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
 
-    if(codigoDigitado.toUpperCase() === codigoEsperado) {
-        database.ref('usuarios/' + userLogado.fone).update({
-            isPro: true
+        .loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader-moon {
+            font-size: 4rem;
+            color: var(--gold);
+            animation: crescent 2s ease-in-out infinite;
+        }
+
+        @keyframes crescent {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(20deg); }
+        }
+
+        /* Auth Screens */
+        .auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9000;
+            padding: 20px;
+        }
+
+        .auth-screen.hidden {
+            display: none;
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-logo .logo-icon {
+            font-size: 5rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-logo h1 {
+            font-family: 'Amiri', serif;
+            color: var(--gold);
+            font-size: 2rem;
+        }
+
+        .auth-form {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(212,175,55,0.3);
+        }
+
+        .auth-form h2 {
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--cream);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: rgba(255,255,255,0.2);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: var(--dark-green);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--light-gold);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--white);
+            border: 2px solid var(--gold);
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gold);
+            color: var(--dark-green);
+        }
+
+        .btn-whatsapp {
+            background: var(--whatsapp);
+            color: var(--white);
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-whatsapp:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--cream);
+        }
+
+        .auth-toggle a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Main App */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, var(--dark-green), var(--primary-green));
+            color: var(--white);
+            padding: 15px 20px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-green);
+            font-weight: bold;
+        }
+
+        .user-details h4 {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .user-stars {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: var(--gold);
+        }
+
+        .pro-badge {
+            background: var(--gold);
+            color: var(--dark-green);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: var(--white);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* Prayer Hero */
+        .prayer-hero {
+            margin-top: 70px;
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: var(--white);
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prayer-hero::before {
+            content: '☪';
+            position: absolute;
+            font-size: 10rem;
+            opacity: 0.05;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .current-prayer {
+            position: relative;
+            z-index: 1;
+        }
+
+        .current-prayer h2 {
+            font-family: 'Amiri', serif;
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .countdown {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .next-prayer {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .azan-btn {
+            background: var(--gold);
+            color: var(--dark-green);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: none;
+        }
+
+        .azan-btn.show {
+            display: inline-block;
+            animation: pulse 1s infinite;
+        }
+
+        /* Hadith Section */
+        .hadith-section {
+            background: var(--white);
+            margin: 20px;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .hadith-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--primary-green);
+        }
+
+        .hadith-header i {
+            font-size: 1.5rem;
+        }
+
+        .hadith-text {
+            font-style: italic;
+            color: var(--dark);
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .hadith-source {
+            margin-top: 15px;
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .menu-item {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 25px 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .menu-item i {
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .menu-item span {
+            font-size: 0.85rem;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .menu-item.whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: var(--white);
+        }
+
+        .menu-item.whatsapp i, .menu-item.whatsapp span {
+            color: var(--white);
+        }
+
+        .menu-item.locked {
+            opacity: 0.5;
+            position: relative;
+        }
+
+        .menu-item.locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1rem;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item i {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .nav-item.active {
+            color: var(--primary-green);
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding: 80px 20px 100px;
+            background: var(--cream);
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .screen-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            color: var(--gold);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .screen-title {
+            font-family: 'Amiri', serif;
+            color: var(--dark-green);
+            font-size: 1.5rem;
+        }
+
+        /* Tasbih Screen */
+        .tasbih-container {
+            background: var(--white);
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .tasbih-arabic {
+            font-family: 'Noto Naskh Arabic', serif;
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 10px;
+        }
+
+        .tasbih-translation {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .tasbih-counter {
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--gold);
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .tasbih-goal {
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        .tasbih-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .tasbih-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tasbih-btn.count {
+            background: linear-gradient(135deg, var(--primary-green), var(--light-green));
+            color: var(--white);
+            font-size: 2rem;
+        }
+
+        .tasbih-btn.count:active {
+            transform: scale(0.95);
+        }
+
+        .tasbih-btn.reset {
+            background: #eee;
+            color: #666;
+        }
+
+        .dhikr-selector {
+            margin-bottom: 30px;
+        }
+
+        .dhikr-selector select {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--primary-green);
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            background: var(--white);
+            color: var(--dark);
+        }
+
+        /* Chat Screen */
+        .chat-container {
+            background: var(--white);
+            border-radius: 20px;
+            height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.own {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message-bubble {
+            background: var(--white);
+            padding: 12px 18px;
+            border-radius: 20px;
+            display: inline-block;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .chat-message.own .message-bubble {
+            background: var(--primary-green);
+            color: var(--white);
+        }
+
+        .message-sender {
+            font-size: 0.8rem;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            background: var(--white);
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        .chat-send {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            color: var(--gold);
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Stars Warning */
+        .stars-warning {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: var(--red);
+            color: var(--white);
+            padding: 15px;
+            text-align: center;
+            z-index: 999;
+            display: none;
+        }
+
+        .stars-warning.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Earn Stars Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: var(--dark-green);
+            margin-bottom: 20px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: var(--cream);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            background: var(--light-green);
+            color: var(--white);
+        }
+
+        .task-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-green);
+            font-size: 1.5rem;
+        }
+
+        .task-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .task-info h4 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .task-info p {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .task-reward {
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .close-modal {
+            background: var(--primary-green);
+            color: var(--white);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* Pro Code Modal */
+        .pro-code-modal .modal-content {
+            max-width: 350px;
+        }
+
+        .pro-code-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--gold);
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            letter-spacing: 5px;
+            margin: 20px 0;
+            text-transform: uppercase;
+        }
+
+        .pro-code-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+
+        .pro-info {
+            background: var(--cream);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .pro-info p {
+            margin-bottom: 10px;
+        }
+
+        .pro-info strong {
+            color: var(--primary-green);
+        }
+
+        /* Web View Modal */
+        .web-view-modal {
+            z-index: 10001;
+        }
+
+        .web-view-modal .modal-content {
+            max-width: 95%;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .web-view-header {
+            background: var(--dark-green);
+            color: var(--white);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .web-view-header h3 {
+            margin: 0;
+            color: var(--gold);
+        }
+
+        .close-web-view {
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .web-view-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+            border-radius: 0 0 20px 20px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tasbih-counter {
+                font-size: 3.5rem;
+            }
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--cream);
+            z-index: 8000;
+            padding: 80px 20px 100px;
+            overflow-y: auto;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-section {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .admin-section h3 {
+            color: var(--dark-green);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--cream);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .user-list-info h4 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .user-list-info p {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.8rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .btn-approve {
+            background: var(--whatsapp);
+            color: var(--white);
+        }
+
+        .btn-reject {
+            background: var(--red);
+            color: var(--white);
+        }
+
+        .btn-pro {
+            background: var(--gold);
+            color: var(--dark-green);
+        }
+
+        /* Pro Badge Animation */
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px var(--gold); }
+            50% { box-shadow: 0 0 20px var(--gold), 0 0 40px var(--light-gold); }
+        }
+
+        .pro-badge {
+            animation: glow 2s infinite;
+        }
+
+        /* Daily Limit Info */
+        .daily-limit-info {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: var(--white);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .daily-limit-info h4 {
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .limit-progress {
+            background: rgba(255,255,255,0.2);
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .limit-progress-bar {
+            background: var(--gold);
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-moon">☪</div>
+        <p style="color: var(--gold); margin-top: 20px; font-family: 'Amiri', serif;">Carregando...</p>
+    </div>
+
+    <!-- Auth Screen -->
+    <div class="auth-screen" id="authScreen">
+        <div class="auth-logo">
+            <div class="logo-icon">🕋</div>
+            <h1>ISLAM MOÇAMBIQUE</h1>
+        </div>
+        
+        <div class="auth-form" id="loginForm">
+            <h2>Entrar</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary" onclick="login()">Entrar</button>
+            <button class="btn btn-secondary" onclick="showRegister()">Criar Conta</button>
+            <button class="btn btn-whatsapp" onclick="contactAdmin()">
+                <i class="fab fa-whatsapp"></i> Falar com Admin
+            </button>
+        </div>
+
+        <div class="auth-form hidden" id="registerForm">
+            <h2>Criar Conta</h2>
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" id="registerName" placeholder="Seu nome">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="registerEmail" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="tel" id="registerPhone" placeholder="+258 84 000 0000">
+            </div>
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="registerPassword" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary" onclick="register()">Criar Conta</button>
+            <button class="btn btn-secondary" onclick="showLogin()">Já tenho conta</button>
+        </div>
+    </div>
+
+    <!-- Stars Warning -->
+    <div class="stars-warning" id="starsWarning">
+        <i class="fas fa-exclamation-triangle"></i>
+        Você precisa de mais estrelas! Complete tarefas diárias.
+    </div>
+
+    <!-- Earn Stars Modal -->
+    <div class="modal-overlay" id="earnStarsModal">
+        <div class="modal-content">
+            <h3>⭐ Ganhar Estrelas</h3>
+            
+            <div class="daily-limit-info">
+                <h4>Limite Diário: <span id="dailyLimitText">0/50</span></h4>
+                <div class="limit-progress">
+                    <div class="limit-progress-bar" id="limitProgressBar" style="width: 0%"></div>
+                </div>
+                <p style="font-size: 0.8rem; margin-top: 8px;">Máximo 50 estrelas por dia</p>
+            </div>
+
+            <div class="task-item" onclick="completeTask('prayer', 5)">
+                <div class="task-icon"><i class="fas fa-pray"></i></div>
+                <div class="task-info">
+                    <h4>Orar no Horário</h4>
+                    <p>Realize suas orações diárias</p>
+                </div>
+                <span class="task-reward">+5⭐</span>
+            </div>
+
+            <div class="task-item" onclick="completeTask('tasbih', 3)">
+                <div class="task-icon"><i class="fas fa-beads"></i></div>
+                <div class="task-info">
+                    <h4>Usar Tasbih</h4>
+                    <p>Faça dhikr 33 vezes</p>
+                </div>
+                <span class="task-reward">+3⭐</span>
+            </div>
+
+            <div class="task-item" onclick="completeTask('quran', 10)">
+                <div class="task-icon"><i class="fas fa-book-quran"></i></div>
+                <div class="task-info">
+                    <h4>Ler Alcorão</h4>
+                    <p>Leia pelo menos 10 versículos</p>
+                </div>
+                <span class="task-reward">+10⭐</span>
+            </div>
+
+            <div class="task-item" onclick="completeTask('invite', 20)">
+                <div class="task-icon"><i class="fas fa-user-plus"></i></div>
+                <div class="task-info">
+                    <h4>Convidar Amigo</h4>
+                    <p>Convide um amigo para o app</p>
+                </div>
+                <span class="task-reward">+20⭐</span>
+            </div>
+
+            <button class="close-modal" onclick="closeEarnStarsModal()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Pro Code Modal -->
+    <div class="modal-overlay pro-code-modal" id="proCodeModal">
+        <div class="modal-content">
+            <h3>⭐ Ativar Nível Pro</h3>
+            
+            <div class="pro-info">
+                <p><strong>Valor:</strong> 25 MTN</p>
+                <p><strong>Benefícios:</strong></p>
+                <p>• Acesso ilimitado a todos os conteúdos</p>
+                <p>• Suporte prioritário</p>
+                <p>• Recursos exclusivos</p>
+                <p style="margin-top: 15px; color: var(--primary-green);">
+                    <strong>Contate o administrador para obter seu código após o pagamento.</strong>
+                </p>
+            </div>
+
+            <input type="text" 
+                   class="pro-code-input" 
+                   id="proCodeInput" 
+                   placeholder="CÓDIGO" 
+                   maxlength="4"
+                   oninput="this.value = this.value.toUpperCase()">
+            
+            <button class="btn btn-primary" onclick="activatePro()">Ativar Pro</button>
+            <button class="btn btn-secondary" onclick="closeProModal()" style="margin-top: 10px;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Web View Modal -->
+    <div class="modal-overlay web-view-modal" id="webViewModal">
+        <div class="modal-content">
+            <div class="web-view-header">
+                <h3 id="webViewTitle">Conteúdo</h3>
+                <button class="close-web-view" onclick="closeWebView()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <iframe class="web-view-frame" id="webViewFrame" src=""></iframe>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-container" id="appContainer">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-details">
+                    <h4 id="userName">Usuário</h4>
+                    <div class="user-stars">
+                        <i class="fas fa-star"></i>
+                        <span id="userStars">0</span>
+                        <span class="pro-badge hidden" id="proBadge">PRO</span>
+                    </div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </header>
+
+        <!-- Prayer Hero -->
+        <section class="prayer-hero">
+            <div class="current-prayer">
+                <h2 id="currentPrayerName">Carregando...</h2>
+                <div class="countdown" id="prayerCountdown">00:00:00</div>
+                <p class="next-prayer" id="nextPrayerInfo">Próxima oração em...</p>
+                <button class="azan-btn" id="azanBtn" onclick="playAzan()">
+                    <i class="fas fa-volume-high"></i> Ouvir Azan
+                </button>
+            </div>
+        </section>
+
+        <!-- Hadith Section -->
+        <section class="hadith-section">
+            <div class="hadith-header">
+                <i class="fas fa-quote-right"></i>
+                <h3>Hadith do Dia</h3>
+            </div>
+            <p class="hadith-text" id="hadithText">
+                "As ações são julgadas por intenções, e cada pessoa terá o que pretendeu."
+            </p>
+            <p class="hadith-source" id="hadithSource">Sahih al-Bukhari 1</p>
+        </section>
+
+        <!-- Menu Grid -->
+        <nav class="menu-grid">
+            <a href="https://exemplo-kalimah1.com" class="menu-item" onclick="openWebView(event, 'Kalimah Tayyibah', this.href)">
+                <i class="fas fa-hand-holding-heart"></i>
+                <span>Kalimah Tayyibah</span>
+            </a>
+            
+            <a href="https://exemplo-kalimah2.com" class="menu-item" onclick="openWebView(event, 'Kalimah Shahadah', this.href)">
+                <i class="fas fa-mosque"></i>
+                <span>Kalimah Shahadah</span>
+            </a>
+            
+            <a href="https://exemplo-kalimah3.com" class="menu-item" onclick="openWebView(event, 'Kalimah Tamjeed', this.href)">
+                <i class="fas fa-star-and-crescent"></i>
+                <span>Kalimah Tamjeed</span>
+            </a>
+            
+            <a href="https://exemplo-kalimah4.com" class="menu-item" onclick="openWebView(event, 'Kalimah Tawheed', this.href)">
+                <i class="fas fa-om"></i>
+                <span>Kalimah Tawheed</span>
+            </a>
+            
+            <a href="https://exemplo-kalimah5.com" class="menu-item" onclick="openWebView(event, 'Kalimah Istighfar', this.href)">
+                <i class="fas fa-praying-hands"></i>
+                <span>Kalimah Istighfar</span>
+            </a>
+            
+            <a href="https://exemplo-kalimah6.com" class="menu-item" onclick="openWebView(event, 'Kalimah Radd Kufr', this.href)">
+                <i class="fas fa-shield-alt"></i>
+                <span>Kalimah Radd Kufr</span>
+            </a>
+            
+            <a href="https://exemplo-kalimah7.com" class="menu-item" onclick="openWebView(event, 'Kalimah Shahadah Completa', this.href)">
+                <i class="fas fa-kaaba"></i>
+                <span>Kalimah Completa</span>
+            </a>
+
+            <a href="https://exemplo-duas.com" class="menu-item" onclick="openWebView(event, 'Duãs Diárias', this.href)">
+                <i class="fas fa-book-open"></i>
+                <span>Duãs Diárias</span>
+            </a>
+
+            <div class="menu-item" onclick="showTasbih()">
+                <i class="fas fa-beads"></i>
+                <span>Tasbih Digital</span>
+            </div>
+
+            <div class="menu-item" onclick="showChat()">
+                <i class="fas fa-comments"></i>
+                <span>Chat Comunitário</span>
+            </div>
+
+            <div class="menu-item" onclick="showEarnStars()">
+                <i class="fas fa-star" style="color: var(--gold)"></i>
+                <span>Ganhar Estrelas</span>
+            </div>
+
+            <div class="menu-item locked" id="proMenuItem" onclick="showProModal()">
+                <i class="fas fa-crown" style="color: var(--gold)"></i>
+                <span>Nível Pro</span>
+            </div>
+
+            <a href="https://wa.me/258840000000" class="menu-item whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i>
+                <span>Suporte WhatsApp</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Tasbih Screen -->
+    <div class="screen" id="tasbihScreen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="showHome()">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h2 class="screen-title">Tasbih Digital</h2>
+        </div>
+
+        <div class="tasbih-container">
+            <div class="dhikr-selector">
+                <select id="dhikrSelect" onchange="changeDhikr()">
+                    <option value="subhanallah">Subhanallah (33x)</option>
+                    <option value="alhamdulillah">Alhamdulillah (33x)</option>
+                    <option value="allahuakbar">Allahu Akbar (33x)</option>
+                    <option value="lailaha">La ilaha illallah (100x)</option>
+                    <option value="astaghfirullah">Astaghfirullah (100x)</option>
+                </select>
+            </div>
+
+            <div class="tasbih-arabic" id="dhikrArabic">سبحان الله</div>
+            <div class="tasbih-translation" id="dhikrTranslation">Glória a Deus</div>
+            
+            <div class="tasbih-counter" id="tasbihCount">0</div>
+            <div class="tasbih-goal" id="tasbihGoal">Meta: 33</div>
+
+            <div class="tasbih-controls">
+                <button class="tasbih-btn reset" onclick="resetTasbih()">
+                    <i class="fas fa-rotate-left"></i>
+                </button>
+                <button class="tasbih-btn count" onclick="incrementTasbih()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div class="screen" id="chatScreen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="showHome()">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h2 class="screen-title">Chat Comunitário</h2>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be loaded here -->
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Escreva sua mensagem..." maxlength="200">
+                <button class="chat-send" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="screen-header">
+            <button class="back-btn" onclick="showHome()">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h2 class="screen-title">Painel Admin</h2>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fas fa-user-clock"></i> Usuários Pendentes</h3>
+            <div id="pendingUsersList">
+                <!-- Pending users loaded here -->
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3><i class="fas fa-crown"></i> Gerenciar Pro</h3>
+            <div id="proUsersList">
+                <!-- Pro users loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="#" class="nav-item active" onclick="showHome()">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showTasbih()">
+            <i class="fas fa-beads"></i>
+            <span>Tasbih</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showChat()">
+            <i class="fas fa-comments"></i>
+            <span>Chat</span>
+        </a>
+        <a href="#" class="nav-item" onclick="showAdmin()" id="adminNavItem" style="display: none;">
+            <i class="fas fa-cog"></i>
+            <span>Admin</span>
+        </a>
+    </nav>
+
+    <script>
+        // Firebase Configuration - REPLACE WITH YOUR CONFIG
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "your-app.firebaseapp.com",
+            databaseURL: "https://your-app-default-rtdb.firebaseio.com",
+            projectId: "your-app",
+            storageBucket: "your-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // Global Variables
+        let currentUser = null;
+        let userData = null;
+        let isAdmin = false;
+        let tasbihCount = 0;
+        let currentDhikr = 'subhanallah';
+        let dailyStars = 0;
+        const MAX_DAILY_STARS = 50;
+
+        // Number to Letter mapping for Pro code (0-9 = A-J)
+        const numberToLetter = {
+            '0': 'A', '1': 'B', '2': 'C', '3': 'D', '4': 'E',
+            '5': 'F', '6': 'G', '7': 'H', '8': 'I', '9': 'J'
+        };
+
+        const letterToNumber = {
+            'A': '0', 'B': '1', 'C': '2', 'D': '3', 'E': '4',
+            'F': '5', 'G': '6', 'H': '7', 'I': '8', 'J': '9'
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 2000);
+
+            // Check auth state
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    loadUserData(user.uid);
+                } else {
+                    showAuth();
+                }
+            });
+
+            // Update prayer times
+            updatePrayerTimes();
+            setInterval(updatePrayerTimes, 60000);
+
+            // Load random hadith
+            loadRandomHadith();
         });
-        alert("Nível PRO ativado com sucesso!");
-    } else {
-        alert("Código incorreto! Fale com o administrador.");
-    }
-}
 
-// --- LÓGICA DA WEBVIEW INTERNA ---
-function abrirDocumento(url, titulo) {
-    // Adiciona /preview para o Google permitir carregar no iframe
-    const previewUrl = url.replace('/edit', '/preview');
-    document.getElementById('wv-titulo').innerText = titulo;
-    document.getElementById('frame-docs').src = previewUrl;
-    document.getElementById('custom-webview').style.display = 'flex';
-}
+        // Auth Functions
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+        }
 
-function fecharNavegador() {
-    document.getElementById('custom-webview').style.display = 'none';
-    document.getElementById('frame-docs').src = "";
-}
-</script>
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function showAuth() {
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('appContainer').classList.remove('active');
+        }
+
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                alert('Por favor, preencha todos os campos');
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    alert('Erro ao entrar: ' + error.message);
+                });
+        }
+
+        function register() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const phone = document.getElementById('registerPhone').value;
+            const password = document.getElementById('registerPassword').value;
+
+            if (!name || !email || !phone || !password) {
+                alert('Por favor, preencha todos os campos');
+                return;
+            }
+
+            // Create user in Firebase Auth
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // Save user data to database with pending status
+                    return database.ref('users/' + user.uid).set({
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        stars: 0,
+                        isPro: false,
+                        isPending: true,
+                        isAdmin: false,
+                        createdAt: Date.now(),
+                        lastActive: Date.now()
+                    });
+                })
+                .then(() => {
+                    alert('Conta criada! Aguarde aprovação do administrador.');
+                    auth.signOut();
+                    showLogin();
+                })
+                .catch(error => {
+                    alert('Erro ao criar conta: ' + error.message);
+                });
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                userData = null;
+                isAdmin = false;
+                showAuth();
+            });
+        }
+
+        function contactAdmin() {
+            window.open('https://wa.me/258840000000?text=Olá! Gostaria de criar uma conta no Islam Moçambique.', '_blank');
+        }
+
+        // Load User Data
+        function loadUserData(uid) {
+            database.ref('users/' + uid).on('value', (snapshot) => {
+                userData = snapshot.val();
+                
+                if (!userData) return;
+
+                // Check if pending
+                if (userData.isPending && !userData.isAdmin) {
+                    alert('Sua conta está pendente de aprovação. Aguarde contato do administrador.');
+                    auth.signOut();
+                    return;
+                }
+
+                // Update UI
+                document.getElementById('userName').textContent = userData.name || 'Usuário';
+                document.getElementById('userStars').textContent = userData.stars || 0;
+                document.getElementById('userAvatar').textContent = (userData.name || 'U').charAt(0).toUpperCase();
+                
+                // Check Pro status
+                if (userData.isPro) {
+                    document.getElementById('proBadge').classList.remove('hidden');
+                    document.getElementById('proMenuItem').classList.remove('locked');
+                    document.getElementById('proMenuItem').innerHTML = `
+                        <i class="fas fa-crown" style="color: var(--gold)"></i>
+                        <span>Pro Ativo</span>
+                    `;
+                }
+
+                // Check Admin status
+                if (userData.isAdmin) {
+                    isAdmin = true;
+                    document.getElementById('adminNavItem').style.display = 'flex';
+                }
+
+                // Load daily stars
+                loadDailyStars();
+
+                // Show app
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('appContainer').classList.add('active');
+                document.getElementById('bottomNav').style.display = 'flex';
+            });
+        }
+
+        // Daily Stars Functions
+        function loadDailyStars() {
+            const today = new Date().toDateString();
+            const starsRef = database.ref('dailyStars/' + currentUser.uid + '/' + today);
+            
+            starsRef.on('value', (snapshot) => {
+                dailyStars = snapshot.val() || 0;
+                updateDailyLimitUI();
+            });
+        }
+
+        function updateDailyLimitUI() {
+            const percentage = (dailyStars / MAX_DAILY_STARS) * 100;
+            document.getElementById('dailyLimitText').textContent = `${dailyStars}/${MAX_DAILY_STARS}`;
+            document.getElementById('limitProgressBar').style.width = `${percentage}%`;
+        }
+
+        function canEarnStars(amount) {
+            return (dailyStars + amount) <= MAX_DAILY_STARS;
+        }
+
+        function addStars(amount) {
+            if (!canEarnStars(amount)) {
+                alert(`Limite diário atingido! Máximo ${MAX_DAILY_STARS} estrelas por dia.`);
+                return false;
+            }
+
+            const today = new Date().toDateString();
+            const newTotal = dailyStars + amount;
+            
+            // Update daily stars
+            database.ref('dailyStars/' + currentUser.uid + '/' + today).set(newTotal);
+            
+            // Update total stars
+            const currentTotal = userData.stars || 0;
+            database.ref('users/' + currentUser.uid + '/stars').set(currentTotal + amount);
+            
+            return true;
+        }
+
+        // Task Completion
+        function completeTask(taskType, reward) {
+            if (!canEarnStars(reward)) {
+                alert(`Você atingiu o limite diário de ${MAX_DAILY_STARS} estrelas!`);
+                return;
+            }
+
+            // Check if task already completed today
+            const today = new Date().toDateString();
+            const taskRef = database.ref('tasks/' + currentUser.uid + '/' + today + '/' + taskType);
+            
+            taskRef.once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    alert('Você já completou esta tarefa hoje!');
+                    return;
+                }
+
+                // Mark task as completed
+                taskRef.set({
+                    completed: true,
+                    timestamp: Date.now(),
+                    reward: reward
+                });
+
+                // Add stars
+                if (addStars(reward)) {
+                    alert(`Parabéns! Você ganhou ${reward} estrelas!`);
+                    updateDailyLimitUI();
+                }
+            });
+        }
+
+        // Pro Code Logic
+        function generateProCode(uid) {
+            // Get last 4 characters of UID (usually numbers)
+            const last4 = uid.slice(-4);
+            let code = '';
+            
+            for (let char of last4) {
+                if (numberToLetter[char]) {
+                    code += numberToLetter[char];
+                } else {
+                    // If not a number, convert char code to letter
+                    code += String.fromCharCode(65 + (char.charCodeAt(0) % 10));
+                }
+            }
+            
+            return code;
+        }
+
+        function verifyProCode(uid, inputCode) {
+            const expectedCode = generateProCode(uid);
+            return inputCode.toUpperCase() === expectedCode;
+        }
+
+        function showProModal() {
+            if (userData.isPro) {
+                alert('Você já é um usuário Pro!');
+                return;
+            }
+            document.getElementById('proCodeModal').classList.add('show');
+        }
+
+        function closeProModal() {
+            document.getElementById('proCodeModal').classList.remove('show');
+            document.getElementById('proCodeInput').value = '';
+        }
+
+        function activatePro() {
+            const inputCode = document.getElementById('proCodeInput').value.toUpperCase();
+            
+            if (inputCode.length !== 4) {
+                alert('O código deve ter 4 letras!');
+                return;
+            }
+
+            // Verify code
+            if (verifyProCode(currentUser.uid, inputCode)) {
+                // Activate Pro
+                database.ref('users/' + currentUser.uid).update({
+                    isPro: true,
+                    proActivatedAt: Date.now()
+                }).then(() => {
+                    alert('🎉 Parabéns! Nível Pro ativado com sucesso!');
+                    closeProModal();
+                });
+            } else {
+                alert('Código inválido! Entre em contato com o administrador após realizar o pagamento de 25 MTN.');
+            }
+        }
+
+        // Web View Functions
+        function openWebView(event, title, url) {
+            event.preventDefault();
+            document.getElementById('webViewTitle').textContent = title;
+            document.getElementById('webViewFrame').src = url;
+            document.getElementById('webViewModal').classList.add('show');
+        }
+
+        function closeWebView() {
+            document.getElementById('webViewModal').classList.remove('show');
+            document.getElementById('webViewFrame').src = '';
+        }
+
+        // Modal Functions
+        function showEarnStars() {
+            updateDailyLimitUI();
+            document.getElementById('earnStarsModal').classList.add('show');
+        }
+
+        function closeEarnStarsModal() {
+            document.getElementById('earnStarsModal').classList.remove('show');
+        }
+
+        // Navigation Functions
+        function showHome() {
+            hideAllScreens();
+            document.getElementById('appContainer').classList.add('active');
+            updateNavActive(0);
+        }
+
+        function showTasbih() {
+            hideAllScreens();
+            document.getElementById('tasbihScreen').classList.add('active');
+            updateNavActive(1);
+        }
+
+        function showChat() {
+            hideAllScreens();
+            document.getElementById('chatScreen').classList.add('active');
+            updateNavActive(2);
+            loadChatMessages();
+        }
+
+        function showAdmin() {
+            if (!isAdmin) return;
+            hideAllScreens();
+            document.getElementById('adminPanel').classList.add('active');
+            updateNavActive(3);
+            loadAdminData();
+        }
+
+        function hideAllScreens() {
+            document.getElementById('appContainer').classList.remove('active');
+            document.getElementById('tasbihScreen').classList.remove('active');
+            document.getElementById('chatScreen').classList.remove('active');
+            document.getElementById('adminPanel').classList.remove('active');
+        }
+
+        function updateNavActive(index) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Tasbih Functions
+        const dhikrData = {
+            subhanallah: { arabic: 'سبحان الله', translation: 'Glória a Deus', goal: 33 },
+            alhamdulillah: { arabic: 'الحمد لله', translation: 'Louvado seja Deus', goal: 33 },
+            allahuakbar: { arabic: 'الله أكبر', translation: 'Deus é Grande', goal: 33 },
+            lailaha: { arabic: 'لا إله إلا الله', translation: 'Não há deus senão Deus', goal: 100 },
+            astaghfirullah: { arabic: 'أستغفر الله', translation: 'Peço perdão a Deus', goal: 100 }
+        };
+
+        function changeDhikr() {
+            currentDhikr = document.getElementById('dhikrSelect').value;
+            const data = dhikrData[currentDhikr];
+            document.getElementById('dhikrArabic').textContent = data.arabic;
+            document.getElementById('dhikrTranslation').textContent = data.translation;
+            document.getElementById('tasbihGoal').textContent = 'Meta: ' + data.goal;
+            resetTasbih();
+        }
+
+        function incrementTasbih() {
+            tasbihCount++;
+            document.getElementById('tasbihCount').textContent = tasbihCount;
+            
+            const goal = dhikrData[currentDhikr].goal;
+            if (tasbihCount === goal) {
+                // Complete task
+                completeTask('tasbih', 3);
+            }
+        }
+
+        function resetTasbih() {
+            tasbihCount = 0;
+            document.getElementById('tasbihCount').textContent = '0';
+        }
+
+        // Chat Functions
+        function loadChatMessages() {
+            const messagesRef = database.ref('chat').limitToLast(50);
+            messagesRef.on('value', (snapshot) => {
+                const messages = snapshot.val();
+                const container = document.getElementById('chatMessages');
+                container.innerHTML = '';
+                
+                if (messages) {
+                    Object.values(messages).forEach(msg => {
+                        const isOwn = msg.uid === currentUser.uid;
+                        const div = document.createElement('div');
+                        div.className = 'chat-message ' + (isOwn ? 'own' : '');
+                        div.innerHTML = `
+                            <div class="message-sender">${msg.name}</div>
+                            <div class="message-bubble">${msg.text}</div>
+                        `;
+                        container.appendChild(div);
+                    });
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            const message = {
+                uid: currentUser.uid,
+                name: userData.name,
+                text: text,
+                timestamp: Date.now()
+            };
+            
+            database.ref('chat').push(message);
+            input.value = '';
+        }
+
+        // Admin Functions
+        function loadAdminData() {
+            // Load pending users
+            database.ref('users').orderByChild('isPending').equalTo(true).on('value', (snapshot) => {
+                const container = document.getElementById('pendingUsersList');
+                container.innerHTML = '';
+                
+                const users = snapshot.val();
+                if (users) {
+                    Object.entries(users).forEach(([uid, user]) => {
+                        const div = document.createElement('div');
+                        div.className = 'user-list-item';
+                        div.innerHTML = `
+                            <div class="user-list-info">
+                                <h4>${user.name}</h4>
+                                <p>${user.email} | ${user.phone}</p>
+                            </div>
+                            <div class="user-actions">
+                                <button class="btn-small btn-approve" onclick="approveUser('${uid}')">
+                                    Aprovar
+                                </button>
+                                <button class="btn-small btn-reject" onclick="rejectUser('${uid}')">
+                                    Rejeitar
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                } else {
+                    container.innerHTML = '<p style="text-align: center; color: #999;">Nenhum usuário pendente</p>';
+                }
+            });
+
+            // Load all users for Pro management
+            database.ref('users').on('value', (snapshot) => {
+                const container = document.getElementById('proUsersList');
+                container.innerHTML = '';
+                
+                const users = snapshot.val();
+                if (users) {
+                    Object.entries(users).forEach(([uid, user]) => {
+                        if (user.isPro) {
+                            const div = document.createElement('div');
+                            div.className = 'user-list-item';
+                            div.innerHTML = `
+                                <div class="user-list-info">
+                                    <h4>${user.name} <span style="color: var(--gold)">⭐ PRO</span></h4>
+                                    <p>${user.email}</p>
+                                </div>
+                                <div class="user-actions">
+                                    <button class="btn-small btn-reject" onclick="removePro('${uid}')">
+                                        Remover Pro
+                                    </button>
+                                </div>
+                            `;
+                            container.appendChild(div);
+                        }
+                    });
+                }
+            });
+        }
+
+        function approveUser(uid) {
+            database.ref('users/' + uid).update({
+                isPending: false,
+                approvedAt: Date.now()
+            }).then(() => {
+                alert('Usuário aprovado!');
+            });
+        }
+
+        function rejectUser(uid) {
+            if (confirm('Tem certeza que deseja rejeitar este usuário?')) {
+                database.ref('users/' + uid).remove().then(() => {
+                    // Also delete auth user (requires Cloud Function in production)
+                    alert('Usuário rejeitado.');
+                });
+            }
+        }
+
+        function removePro(uid) {
+            if (confirm('Remover status Pro deste usuário?')) {
+                database.ref('users/' + uid).update({
+                    isPro: false
+                }).then(() => {
+                    alert('Status Pro removido.');
+                });
+            }
+        }
+
+        // Admin: Generate Pro Code for User
+        function getProCodeForUser(uid) {
+            return generateProCode(uid);
+        }
+
+        // Prayer Times (Simplified for Mozambique)
+        function updatePrayerTimes() {
+            const prayers = [
+                { name: 'Fajr', time: '05:00' },
+                { name: 'Dhuhr', time: '12:30' },
+                { name: 'Asr', time: '15:30' },
+                { name: 'Maghrib', time: '18:15' },
+                { name: 'Isha', time: '19:45' }
+            ];
+
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+
+            let nextPrayer = null;
+            let minDiff = Infinity;
+
+            prayers.forEach(prayer => {
+                const [hours, minutes] = prayer.time.split(':').map(Number);
+                const prayerTime = hours * 60 + minutes;
+                let diff = prayerTime - currentTime;
+                
+                if (diff < 0) diff += 24 * 60; // Next day
+                
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    nextPrayer = prayer;
+                }
+            });
+
+            if (nextPrayer) {
+                document.getElementById('currentPrayerName').textContent = nextPrayer.name;
+                
+                const hours = Math.floor(minDiff / 60);
+                const minutes = minDiff % 60;
+                document.getElementById('prayerCountdown').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+                
+                document.getElementById('nextPrayerInfo').textContent = 
+                    `Horário: ${nextPrayer.time}`;
+
+                // Show Azan button if less than 5 minutes
+                if (minDiff < 5) {
+                    document.getElementById('azanBtn').classList.add('show');
+                } else {
+                    document.getElementById('azanBtn').classList.remove('show');
+                }
+            }
+        }
+
+        function playAzan() {
+            // In production, play actual Azan audio
+            alert('Tocando Azan... (Em produção: áudio real do Azan)');
+        }
+
+        // Hadith Data
+        const hadiths = [
+            { text: "As ações são julgadas por intenções, e cada pessoa terá o que pretendeu.", source: "Sahih al-Bukhari 1" },
+            { text: "Nenhum de vocês crê verdadeiramente até que deseje para seu irmão o que deseja para si mesmo.", source: "Sahih al-Bukhari 13" },
+            { text: "O mais forte entre vocês é aquele que controla sua raiva.", source: "Sahih al-Bukhari 6114" },
+            { text: "Aquele que não agradece às pessoas, não agradece a Allah.", source: "Sunan Abu Dawood 4811" },
+            { text: "Diga: 'Não há deus senão Allah' e tenha sucesso.", source: "Sahih al-Bukhari 6044" }
+        ];
+
+        function loadRandomHadith() {
+            const hadith = hadiths[Math.floor(Math.random() * hadiths.length)];
+            document.getElementById('hadithText').textContent = '"' + hadith.text + '"';
+            document.getElementById('hadithSource').textContent = hadith.source;
+        }
+
+        // Close modals on outside click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal && !modal.classList.contains('web-view-modal')) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        document.getElementById('proCodeInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') activatePro();
+        });
+    </script>
+</body>
+</html>
