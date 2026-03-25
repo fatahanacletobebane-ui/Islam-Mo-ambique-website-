@@ -4,173 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🕌 ISLAM MOÇAMBIQUE 🕌</title>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary-green: #1a5f4a; --dark-green: #0d3d2d; --light-green: #2d8a6e;
-            --gold: #d4af37; --light-gold: #f4d03f; --cream: #f5f5dc;
-            --white: #ffffff; --dark: #1a1a1a; --red: #e74c3c; --whatsapp: #25D366;
+            --primary-green: #1a5f4a; --dark-green: #0d3d2d;
+            --gold: #d4af37; --cream: #f5f5dc; --white: #ffffff;
         }
-        body { font-family: 'Cairo', sans-serif; background-color: var(--cream); color: var(--dark); overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--cream); overflow-x: hidden; }
         
-        /* Loader */
-        .loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark-green); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease; }
-        .loader.hidden { opacity: 0; pointer-events: none; }
-        
-        /* Auth Screens */
-        .auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--dark-green), var(--primary-green)); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9000; padding: 20px; }
-        .auth-screen.hidden { display: none; }
-        .auth-form { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid rgba(212,175,55,0.3); }
-        
-        /* UI Components */
-        .app-container { display: none; min-height: 100vh; padding-bottom: 80px; }
-        .app-container.active { display: block; }
-        .app-header { background: linear-gradient(135deg, var(--dark-green), var(--primary-green)); color: var(--white); padding: 15px 20px; position: fixed; top: 0; width: 100%; z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
-        .pro-badge { background: var(--gold); color: var(--dark-green); padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; margin-left: 5px; }
+        /* Loader Corrigido */
+        #loader { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--dark-green); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 9999; 
+        }
+
+        /* Telas */
+        .auth-screen { position: fixed; inset: 0; background: var(--primary-green); display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 20px; }
+        .app-container { display: none; padding-top: 70px; }
         .hidden { display: none !important; }
 
-        /* Menu Grid */
-        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px; margin-top: 80px; }
-        .menu-item { background: var(--white); border-radius: 20px; padding: 25px 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; }
-        .menu-item i { font-size: 2.5rem; color: var(--primary-green); margin-bottom: 10px; display: block; }
+        /* Cabeçalho */
+        .app-header { background: var(--dark-green); color: white; padding: 15px; position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; z-index: 1000; }
         
-        /* WebView */
-        .webview-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--white); z-index: 10000; display: none; flex-direction: column; }
-        .webview-container.show { display: flex; }
-        .webview-header { background: var(--dark-green); color: var(--white); padding: 15px 20px; display: flex; align-items: center; gap: 15px; }
-        .webview-frame { flex: 1; border: none; width: 100%; }
-        .back-btn { background: var(--gold); border: none; padding: 10px; border-radius: 50%; cursor: pointer; }
+        /* Menu */
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; }
+        .menu-item { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .menu-item i { font-size: 2rem; color: var(--primary-green); margin-bottom: 10px; }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; }
-        .modal-overlay.show { display: flex; }
-        .modal-content { background: var(--white); border-radius: 20px; padding: 30px; width: 90%; max-width: 400px; text-align: center; }
-        .btn { padding: 12px; border-radius: 25px; border: none; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
-        .btn-gold { background: var(--gold); color: var(--dark-green); }
+        /* Iframe WebView */
+        #webview-container { position: fixed; inset: 0; background: white; z-index: 10001; display: none; flex-direction: column; }
+        .webview-header { background: var(--dark-green); color: white; padding: 15px; display: flex; align-items: center; gap: 10px; }
+        iframe { flex: 1; border: none; width: 100%; }
+        
+        .btn-gold { background: var(--gold); color: var(--dark-green); border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
 
-    <div class="loader" id="loader">
-        <p style="color: white;">Carregando...</p>
+    <div id="loader">
+        <i class="fas fa-mosque fa-3x" style="color: var(--gold); margin-bottom: 15px;"></i>
+        <p style="color: white;">Iniciando...</p>
     </div>
 
     <div class="auth-screen" id="login-screen">
-        <div class="auth-form">
-            <h2 style="color: white; text-align: center; margin-bottom: 20px;">Entrar</h2>
-            <input type="tel" id="login-phone" placeholder="Número (+258)" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: none;">
-            <input type="password" id="login-pin" placeholder="PIN" style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 10px; border: none;">
-            <button class="btn btn-gold" onclick="handleLogin()">Entrar</button>
+        <div style="background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 350px;">
+            <h2 style="text-align: center; margin-bottom: 20px;">Entrar</h2>
+            <input type="tel" id="login-phone" placeholder="Telemóvel (ex: 84...)">
+            <button class="btn-gold" onclick="entrar()">ENTRAR</button>
         </div>
     </div>
 
-    <div class="app-container" id="app-container">
+    <div class="app-container" id="app-main">
         <div class="app-header">
+            <span id="user-info">Usuário</span>
             <div>
-                <span id="user-display-name">Usuário</span>
-                <span id="stars-display">⭐ 0</span>
-                <span id="pro-badge" class="pro-badge hidden">PRO</span>
+                <span id="user-stars">⭐ 0</span>
+                <span id="pro-tag" style="display:none; background: var(--gold); padding: 2px 5px; border-radius: 5px; font-size: 10px; margin-left:5px;">PRO</span>
             </div>
-            <button onclick="location.reload()" style="background:none; border:none; color:white;"><i class="fas fa-sign-out-alt"></i></button>
         </div>
 
         <div class="menu-grid">
-            <div class="menu-item" onclick="openWebview('https://docs.google.com/document/d/1hbf3t_GA-CIK0xVl6QOtow-InPC88ERGYNHupCNuNY8/edit', '7 Kalimahs')">
-                <i class="fas fa-scroll"></i><span>7 Kalimahs</span>
+            <div class="menu-item" onclick="abrirLink('https://docs.google.com/document/d/1hbf3t_GA-CIK0xVl6QOtow-InPC88ERGYNHupCNuNY8/preview', '7 Kalimahs')">
+                <i class="fas fa-book-open"></i><br>7 Kalimahs
             </div>
-            <div class="menu-item" onclick="openWebview('https://docs.google.com/document/d/1V1LBzbZflRYVAxp6xDK6JuN-MHbIAGa3/edit', 'Duãs Diárias')">
-                <i class="fas fa-hands-praying"></i><span>Duãs Diárias</span>
+            <div class="menu-item" onclick="abrirLink('https://docs.google.com/document/d/1V1LBzbZflRYVAxp6xDK6JuN-MHbIAGa3/preview', 'Duãs Diárias')">
+                <i class="fas fa-hands-praying"></i><br>Duãs Diárias
             </div>
-            <div class="menu-item" onclick="showStarsModal()">
-                <i class="fas fa-star" style="color: #d4af37;"></i><span>Ganhar Estrelas</span>
+            <div class="menu-item" onclick="ganharEstrela()">
+                <i class="fas fa-star" style="color:var(--gold)"></i><br>Ganhar Estrela
             </div>
-            <div class="menu-item" onclick="promptProNivel()">
-                <i class="fas fa-crown" style="color: #d4af37;"></i><span>Nível Pro</span>
+            <div class="menu-item" onclick="ativarPro()">
+                <i class="fas fa-crown" style="color:var(--gold)"></i><br>Nível Pro
             </div>
         </div>
     </div>
 
-    <div class="webview-container" id="webview-container">
+    <div id="webview-container">
         <div class="webview-header">
-            <button class="back-btn" onclick="closeWebview()"><i class="fas fa-arrow-left"></i></button>
-            <span id="webview-title">Documento</span>
+            <button onclick="fecharLink()" style="background:none; border:none; color:white; font-size: 20px;"><i class="fas fa-times"></i></button>
+            <span id="wv-titulo">Documento</span>
         </div>
-        <iframe class="webview-frame" id="webview-frame"></iframe>
-    </div>
-
-    <div class="modal-overlay" id="stars-modal">
-        <div class="modal-content">
-            <h3>Ganhar Estrelas</h3>
-            <p>Limite diário: 50 ⭐</p>
-            <button class="btn btn-gold" onclick="addStars(10)">Ver Anúncio (+10)</button>
-            <button class="btn" onclick="closeStarsModal()">Fechar</button>
-        </div>
+        <iframe id="wv-frame"></iframe>
     </div>
 
     <script>
-        // Configuração Firebase (Use a sua) 
-        const firebaseConfig = { /* Sua Configuração aqui */ };
-        
-        let currentUser = { phone: "", stars: 0, isPro: false };
-        const MAP_CONVERT = ['A','B','C','D','E','F','G','H','I','J'];
+        // Forçar saída do loader ao carregar a página
+        window.onload = () => {
+            document.getElementById('loader').classList.add('hidden');
+        };
 
-        function handleLogin() {
-            const phone = document.getElementById('login-phone').value;
-            if(phone.length >= 4) {
-                currentUser.phone = phone;
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-container').classList.add('active');
-                document.getElementById('user-display-name').innerText = phone;
-                document.getElementById('loader').classList.add('hidden');
-            }
+        let db = { stars: 0, phone: "", isPro: false };
+
+        function entrar() {
+            const p = document.getElementById('login-phone').value;
+            if(p.length < 4) return alert("Insira um número válido");
+            db.phone = p;
+            document.getElementById('user-info').innerText = p;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-main').style.display = 'block';
         }
 
-        function openWebview(url, title) {
-            document.getElementById('webview-title').innerText = title;
-            document.getElementById('webview-frame').src = url;
-            document.getElementById('webview-container').classList.add('show');
+        function abrirLink(url, titulo) {
+            document.getElementById('wv-titulo').innerText = titulo;
+            document.getElementById('wv-frame').src = url;
+            document.getElementById('webview-container').style.display = 'flex';
         }
 
-        function closeWebview() {
-            document.getElementById('webview-container').classList.remove('show');
-            document.getElementById('webview-frame').src = "";
+        function fecharLink() {
+            document.getElementById('webview-container').style.display = 'none';
+            document.getElementById('wv-frame').src = "";
         }
 
-        function showStarsModal() { document.getElementById('stars-modal').classList.add('show'); }
-        function closeStarsModal() { document.getElementById('stars-modal').classList.remove('show'); }
-
-        function addStars(amt) {
-            if(currentUser.stars + amt <= 50) {
-                currentUser.stars += amt;
-                document.getElementById('stars-display').innerText = "⭐ " + currentUser.stars;
-                alert("Ganhou " + amt + " estrelas!");
+        function ganharEstrela() {
+            if(db.stars < 50) {
+                db.stars += 10;
+                document.getElementById('user-stars').innerText = "⭐ " + db.stars;
+                alert("Você ganhou 10 estrelas!");
             } else {
-                alert("Limite diário de 50 estrelas atingido!");
+                alert("Limite diário de 50 atingido!");
             }
         }
 
-        function promptProNivel() {
-            const code = prompt("Digite o código secreto fornecido pelo administrador (Pagamento: 25 MTN):");
-            if(!code) return;
+        function ativarPro() {
+            const cod = prompt("Insira o Código Pro (Enviado após pagar 25MTN):");
+            if(!cod) return;
+            
+            // Lógica de validação (converte os 4 últimos dígitos do tel em letras)
+            const mapa = ['A','B','C','D','E','F','G','H','I','J'];
+            let esperado = "";
+            const ultimos4 = db.phone.slice(-4);
+            for(let n of ultimos4) esperado += mapa[parseInt(n)];
 
-            // Lógica: Últimos 4 números do telefone convertidos em letras 
-            const last4 = currentUser.phone.slice(-4);
-            let expectedCode = "";
-            for(let char of last4) {
-                expectedCode += MAP_CONVERT[parseInt(char)] || char;
-            }
-
-            if(code.toUpperCase() === expectedCode) {
-                currentUser.isPro = true;
-                document.getElementById('pro-badge').classList.remove('hidden');
-                alert("Nível PRO ativado com sucesso!");
+            if(cod.toUpperCase() === esperado) {
+                db.isPro = true;
+                document.getElementById('pro-tag').style.display = 'inline';
+                alert("PARABÉNS! Nível PRO Ativado.");
             } else {
-                alert("Código inválido! Contacte o administrador.");
+                alert("Código incorreto!");
             }
         }
     </script>
